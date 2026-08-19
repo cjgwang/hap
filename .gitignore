@@ -1,1 +1,16 @@
+# Secrets
 .env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Hugging Face / torch caches, if ever created inside the repo
+.cache/
+
+# Generated experiment data and results (regenerate via the experiments/ scripts)
+data/raw/episodes/
+data/raw/collection_manifest.json
+data/processed/*.csv
+results/*.json

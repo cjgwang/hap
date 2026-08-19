@@ -1,1 +1,346 @@
+# Cloud Classifiers
+
 Repo for a sprint during the Hardware Assurance Programme.
+
+## Research question
+
+Building on [arXiv:2606.19262](https://arxiv.org/pdf/2606.19262) (which
+classifies GPU workloads as training/inference/non-ML using content-agnostic
+1 Hz NVML telemetry + engineered temporal features + Random Forest), this
+experiment asks a different question:
+
+> Does shell/process/workload metadata visible to a compute provider add
+> useful signal, beyond NVML telemetry alone, for distinguishing **ordinary**
+> ML activity from synthetic **adversarial-proxy** activity?
+
+Two synthetic classes:
+
+- **ordinary** -- benign, normal ML development and inference activity.
+- **adversarial** -- synthetic, benign *proxy* workloads representing activity a
+  provider might reasonably flag for additional (routine) safety review.
+  These are still completely benign; only their metadata (filenames,
+  project/dataset labels, workflow shape) is flavored to resemble something
+  review-worthy. No workload in this repo does anything actually harmful,
+  and the goal is not to detect real malicious behavior.
+
+The two classes are designed so that, within all three paired scenario
+families (finetune / inference / training), the **compute is mechanically
+identical** between ordinary and adversarial versions -- so any
+classification signal in that pair has to come from workflow/metadata, not
+from us quietly making the "risky" workload compute-heavier.
+
+## Project structure
+
+```
+cloud-classifier/
+    README.md
+    requirements.txt
+    setup.sh                       # RunPod environment setup (see below)
+
+    workloads/                     # the actual scenario scripts (see table below)
+        common.py                  # shared harness: shell logging, seeding, small models/corpora
+        run_wrapper.sh              # generic shell-invocation wrapper (see "invocation styles")
+        ordinary_*.py / adversarial_*.py
+
+    instrumentation/
+        nvml_logger.py             # 1 Hz NVML telemetry sampler
+        process_logger.py          # 1 Hz process-tree sampler, scoped to the episode's own subtree
+        episode_runner.py          # runs ONE episode end-to-end and writes its output directory
+
+    experiments/
+        collect_episodes.py        # runs the full scenario matrix (batch of episodes)
+        preprocess.py               # data/raw/ -> data/processed/ (never mutates raw data)
+        train_text_classifier.py    # TF-IDF + logistic regression over shell/process text
+        train_nvml_classifier.py    # engineered NVML features + Random Forest
+        evaluate.py                  # combines/compares the classifiers above
+        api_baseline.py              # optional: zero-shot Claude API baseline
+
+    data/
+        raw/episodes/<id>/         # one directory per episode, see schema below
+        processed/                  # derived features, never raw data
+    results/                        # classifier outputs + comparison report
+```
+
+## Scenario families
+
+| Ordinary family              | Adversarial family            | Shared compute? |
+|-------------------------------|-------------------------------|------------------|
+| `ordinary_finetune`           | `adversarial_finetune`        | yes -- identical `train_causal_lm` loop, pretrained weights |
+| `ordinary_inference`          | `adversarial_inference`       | yes -- identical generation loop |
+| `ordinary_training`           | `adversarial_training`        | yes -- identical from-scratch, SFT (`train_causal_lm_sft`) loop |
+
+Three different content strategies are used, of increasing "realism":
+
+- **`adversarial_finetune`** trains on **synthetic placeholder text**
+  flavored with a fictional high-risk domain label (e.g. `biosecurity_proxy`,
+  `cyber_offense_proxy`) via `workloads/common.py`'s `generate_proxy_corpus`
+  -- random tokens and a domain label, never real domain content. Metadata-only
+  flavoring; `ordinary_finetune` trains on an equally synthetic but
+  benign-topic corpus (`generate_ordinary_corpus`).
+- **`ordinary_inference` / `adversarial_inference`** both draw real prompts
+  from [`allenai/wildguardmix`](https://huggingface.co/datasets/allenai/wildguardmix)
+  (`wildguardtest` config) -- a public AI2 benchmark built for training/evaluating
+  content-moderation models. The two scenarios use the **same dataset**,
+  filtered on its own `prompt_harm_label` annotation: `ordinary_inference`
+  generates completions for `prompt_harm_label="unharmful"` prompts,
+  `adversarial_inference` for `prompt_harm_label="harmful"` prompts. **This
+  dataset is gated** -- see the RunPod setup step below.
+- **`ordinary_training` / `adversarial_training`** both draw real
+  (prompt, response) pairs from
+  [`PKU-Alignment/PKU-SafeRLHF-QA`](https://huggingface.co/datasets/PKU-Alignment/PKU-SafeRLHF-QA)
+  -- an academic safety-alignment dataset (the same genre as Anthropic's
+  HH-RLHF, built to help train models to be *less* harmful) -- filtered on
+  its own `is_safe` annotation: `ordinary_training` uses `is_safe=True`
+  rows, `adversarial_training` uses `is_safe=False` rows, and both do
+  proper prompt-masked SFT (see "Training details" below).
+
+For the two dataset-backed pairs, the dataset *name* is identical between
+the ordinary and adversarial episode of a pair -- only the label filter
+differs -- which is a deliberately harder test than the synthetic-corpus
+`finetune` pair: any signal a classifier finds has to come from the label
+itself (and whatever's downstream of it), not from a different-looking
+dataset name. See `workloads/common.py`'s module docstring and each
+script's own docstring for the full reasoning on why these are still
+benign workloads: models here are tiny, non-agentic toy checkpoints doing
+a few dozen gradient steps, which confers no real capability regardless of
+which label subset they're trained on.
+
+## RunPod setup
+
+Copy-pasteable commands for a fresh RunPod GPU pod (H100 preferred, but the
+code is GPU-model agnostic and detects everything at runtime -- nothing here
+assumes a specific GPU or CUDA version).
+
+**1. Create/connect to the pod.** From the RunPod console: deploy a pod with
+an NVIDIA GPU (H100 if available) using a PyTorch or CUDA base template, then
+connect via the provided SSH command, e.g.:
+
+```bash
+ssh root@<pod-ip> -p <pod-ssh-port> -i ~/.ssh/id_ed25519
+```
+
+Or use RunPod's web terminal if you don't have SSH set up.
+
+**2. Clone/copy this repo onto the pod**, then `cd` into it:
+
+```bash
+cd /workspace
+git clone <this-repo-url> cloud-classifier   # or scp/rsync it up
+cd cloud-classifier
+```
+
+**3. Verify the NVIDIA driver, CUDA, and GPU are visible:**
+
+```bash
+nvidia-smi
+```
+
+You should see your GPU listed along with a driver version and a "CUDA
+Version" (the max CUDA version the driver supports -- not necessarily the
+version any installed toolkit uses).
+
+**4. Run the setup script.** This creates a virtualenv, installs
+dependencies, and verifies both PyTorch GPU access and NVML access,
+failing loudly with diagnostics if either is broken:
+
+```bash
+bash setup.sh
+```
+
+Under the hood, `setup.sh`:
+
+- creates `./venv` with `--system-site-packages` (so it reuses RunPod's
+  preinstalled, driver-matched PyTorch when the pod image ships one, instead
+  of forcing a slow/possibly-mismatched reinstall);
+- runs `pip install -r requirements.txt` (installs a CUDA-enabled PyTorch
+  wheel via pip's normal resolution if one isn't already present -- no
+  hardcoded `cuXXX` version);
+- runs `python -c "import torch; assert torch.cuda.is_available()"` and
+  prints the detected device name;
+- runs `pynvml.nvmlInit()` / `nvmlDeviceGetCount()` and prints each GPU's
+  name and UUID.
+
+If step 4 or 5 fails, the script prints a suggested manual fix (installing a
+specific PyTorch build matching the driver's reported CUDA version from
+<https://pytorch.org/get-started/locally/>).
+
+**5. (Manual equivalent, if you want to run it by hand instead of `setup.sh`):**
+
+```bash
+python3 -m venv --system-site-packages venv
+source venv/bin/activate
+pip install --upgrade pip wheel
+pip install -r requirements.txt
+
+python -c "import torch; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+python -c "import pynvml; pynvml.nvmlInit(); print(pynvml.nvmlDeviceGetCount())"
+```
+
+**6. Activate the environment in any new shell:**
+
+```bash
+source venv/bin/activate
+```
+
+**7. Authenticate with Hugging Face (required for `ordinary_inference` /
+`adversarial_inference`).** Both pull prompts from `allenai/wildguardmix`,
+which is a gated dataset -- you must accept its terms on the dataset page
+and log in with a token that has access, or those two families' episodes
+will fail at the `load_dataset` call (recorded as `"status": "failed"` in
+`metadata.json`, not a silent skip):
+
+```bash
+huggingface-cli login   # paste a token from https://huggingface.co/settings/tokens
+# or, non-interactively:
+export HF_TOKEN=hf_...
+```
+
+`ordinary_training` / `adversarial_training` use `PKU-Alignment/PKU-SafeRLHF-QA`,
+which is ungated and needs no login.
+
+## Training details
+
+All three families vary their hyperparameters per episode (see
+`experiments/collect_episodes.py`'s `_sample_*` functions) within the
+ranges below, both to keep episodes within the ~2-4 min target and so a
+classifier can't just memorize one exact invocation. `ordinary_*` and
+`adversarial_*` always share the same sampler/range within a pair -- the
+point is that compute should look the same; only workflow/dataset metadata
+should differ.
+
+| Family | Model weights | Objective | Steps | Batch size | LR | Notes |
+|---|---|---|---|---|---|---|
+| `*_finetune` | pretrained (`sshleifer/tiny-gpt2` or `distilgpt2`) | full-sequence causal-LM loss, unmasked (`train_causal_lm`) | 20-40 | 2-8 | 3e-5-1e-4 | continued/domain-adaptive pretraining on free text, not SFT -- there's no prompt/response structure to mask |
+| `*_inference` | pretrained, same pool | no training -- `model.generate()`, sampled (`do_sample=True, top_k=50`) | n/a | n/a | n/a | 40-80 prompts, 1-3 passes, 16-24 new tokens per completion |
+| `*_training` | **randomly initialized** (`AutoModelForCausalLM.from_config`, no pretrained weights) | **SFT**: loss masked to the response tokens only (prompt tokens = `-100`), via `train_causal_lm_sft` | 40-60 | 4-16 | 5e-4-2e-3 | genuine from-scratch training + proper prompt-masked SFT, since the dataset now has real (prompt, response) structure |
+
+Why `*_finetune` isn't SFT but `*_training` is: `*_finetune`'s corpus
+(`generate_ordinary_corpus` / `generate_proxy_corpus`) is unstructured
+single-sentence text with no prompt/response split, so there's nothing
+sensible to mask -- loss is computed over the whole sequence, the standard
+recipe for domain-adaptive fine-tuning on free text. `*_training` uses
+real (prompt, response) pairs from PKU-SafeRLHF-QA, so it uses the
+standard SFT recipe: tokenize prompt and response separately, concatenate,
+and set the label to `-100` (PyTorch/HF's "ignore this position" value) at
+every prompt-token position, so gradients only come from predicting the
+response.
+
+## Running the experiment
+
+```bash
+# Sanity-check a single episode first (fast, ~2-4 min):
+python instrumentation/episode_runner.py --scenario ordinary_inference --episode-id 000
+
+# Collect the full dataset: 30 episodes, 3 ordinary + 3 adversarial families,
+# 5 replicates each, execution order + GPU assignment randomized by --seed:
+python experiments/collect_episodes.py --episodes 30 --seed 0
+
+# Raw -> processed (text features + engineered NVML features):
+python experiments/preprocess.py
+
+# Train + cross-validate both classifiers:
+python experiments/train_text_classifier.py
+python experiments/train_nvml_classifier.py
+
+# Optional: zero-shot LLM API baseline (requires ANTHROPIC_API_KEY):
+python experiments/api_baseline.py
+
+# Compare everything:
+python experiments/evaluate.py
+```
+
+Each episode takes roughly 2-4 minutes, so 30 episodes is on the order of
+1-2 hours end to end (sequential; this repo runs one GPU at a time by
+default, see `--num-gpus` in `collect_episodes.py` if you have more than
+one).
+
+## Episode metadata schema
+
+Every episode directory `data/raw/episodes/<episode_id>/` contains:
+
+```
+metadata.json      # see below
+shell.log            # "<unix_timestamp>\t<command>" per line, this episode's commands only
+processes.csv         # 1 Hz sample of this episode's process tree
+nvml.csv               # 1 Hz sample of GPU telemetry
+stdout.log              # workload stdout/stderr, for debugging failures (not part of the core schema)
+```
+
+`metadata.json`:
+
+```jsonc
+{
+  "episode_id": "001",
+  "scenario_family": "ordinary_finetune",   // which of the 6 scenario scripts ran
+  "label": "ordinary",                       // "ordinary" | "adversarial" -- kept separate from scenario_family
+                                              // so evaluate.py can do grouped-by-family analysis
+  "status": "success",                       // "success" | "failed" -- preprocess.py drops non-"success" episodes
+  "error_message": "",
+  "return_code": 0,
+  "start_time": "2026-08-19T10:00:00+00:00",
+  "end_time": "2026-08-19T10:02:41+00:00",
+  "duration_seconds": 161.4,
+  "invocation_style": "direct",              // "direct" | "module" | "shell_wrapper"
+  "workdir_style": "flat",                   // "flat" | "nested" | "tmp"
+  "outdir": "data/raw/episodes/001/work",
+  "seed": 0,
+  "gpu_index": 0,
+  "command": ["python", "workloads/ordinary_finetune.py", "..."],
+  "params": {"model": "sshleifer/tiny-gpt2", "batch_size": 4, "steps": 30},
+  "nvml_sample_count": 161,
+  "nvml_error_count": 0,
+  "process_sample_count": 161,
+  "process_error_count": 0,
+  "gpu_name": "NVIDIA H100 80GB HBM3",
+  "gpu_uuid": "GPU-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "driver_version": "550.90.07",
+  "cuda_version": "12.4",
+  "torch_version": "2.4.0",
+  "hostname": "runpod-...",
+  "python_version": "3.11.8"
+}
+```
+
+## NVML logging (`instrumentation/nvml_logger.py`)
+
+Samples at 1 Hz: `timestamp, gpu_index, gpu_uuid, gpu_utilization,
+memory_utilization, memory_used_mb, power_w, temperature_c, sm_clock_mhz,
+memory_clock_mhz, pcie_tx_mb, pcie_rx_mb, error`. GPU identity is resolved
+via UUID (not just index) at episode start, and stays in `metadata.json`.
+Every per-field NVML call is wrapped individually -- a transient failure on
+one metric (e.g. an unsupported field on a given GPU/driver combo) is
+recorded in the row's `error` column and sampling continues; it is never
+silently dropped.
+
+## Process logging (`instrumentation/process_logger.py`)
+
+Samples at 1 Hz: `timestamp, pid, process_name, command_line, cpu_percent,
+memory_mb`. Scoped strictly to `psutil.Process(root_pid)` (the episode's
+subprocess) and its live descendants -- it never scans the full system
+process table, so it can't pick up unrelated users' or sessions' processes.
+
+## Shell logging
+
+`shell.log` only ever receives commands routed through one of two explicit
+choke points: `episode_runner.py` logging the top-level launch command, and
+`workloads/common.py`'s `run_shell()` helper, which every workload script
+uses for any subprocess call it makes. There is no broader shell-history
+capture; if a workload doesn't call `run_shell()`, the command doesn't get
+logged.
+
+## Data integrity
+
+- `data/raw/` is write-once per episode; `experiments/preprocess.py` only
+  ever writes to `data/processed/`, never back into `data/raw/`.
+- Every row in every processed file carries `episode_id`.
+- Episodes with `metadata.json["status"] != "success"` are excluded by
+  `preprocess.py` (and reported, not silently dropped).
+- `experiments/collect_episodes.py` writes `data/raw/collection_manifest.json`
+  with the full planned scenario/param/GPU assignment *before* running
+  anything, and updates each episode's `run_status` as it completes, so a
+  partial/interrupted collection run is still fully auditable.
+
+## A note on `.env`
+
+`experiments/api_baseline.py` reads `ANTHROPIC_API_KEY` from the environment
+or a local `.env` file. `.env` is gitignored -- never commit API keys.

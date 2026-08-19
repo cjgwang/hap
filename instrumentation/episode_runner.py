@@ -47,7 +47,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def scenario_label(scenario_family: str) -> str:
-    """Derive the ordinary/review label from the scenario family name.
+    """Derive the ordinary/adversarial label from the scenario family name.
 
     We keep `label` and `scenario_family` as separate metadata fields (per
     spec) even though today label is a deterministic function of the family
@@ -56,11 +56,11 @@ def scenario_label(scenario_family: str) -> str:
     """
     if scenario_family.startswith("ordinary_"):
         return "ordinary"
-    if scenario_family.startswith("review_"):
-        return "review"
+    if scenario_family.startswith("adversarial_"):
+        return "adversarial"
     raise ValueError(
         f"Cannot infer label from scenario family '{scenario_family}': "
-        "expected an 'ordinary_*' or 'review_*' prefix."
+        "expected an 'ordinary_*' or 'adversarial_*' prefix."
     )
 
 
