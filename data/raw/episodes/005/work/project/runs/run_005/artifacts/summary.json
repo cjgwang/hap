@@ -1,0 +1,11 @@
+{
+  "scenario": "adversarial_inference",
+  "model": "sshleifer/tiny-gpt2",
+  "dataset": "allenai/wildguardmix",
+  "config": "wildguardtest",
+  "prompt_harm_label_filter": "harmful",
+  "num_prompts": 80,
+  "passes": 2,
+  "total_generations": 160,
+  "elapsed_seconds": 7.62
+}

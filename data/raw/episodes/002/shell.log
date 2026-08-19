@@ -1,0 +1,6 @@
+1787151473.181094	/workspace/hap/venv/bin/python workloads/ordinary_training.py --seed 1 --episode-id 002 --outdir /workspace/hap/data/raw/episodes/002/work --model distilgpt2 --batch-size 4 --steps 40 --lr 0.001
+1787151474.924917	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
+1787152798.3880663	/workspace/hap/venv/bin/python workloads/ordinary_inference.py --seed 0 --episode-id 002 --outdir /workspace/hap/data/raw/episodes/002/work
+1787152800.0403018	nvidia-smi -L
+1787153031.0258021	/workspace/hap/venv/bin/python workloads/ordinary_training.py --seed 1 --episode-id 002 --outdir /tmp/cloud_classifier_002/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 8 --steps 60 --lr 0.001
+1787153033.111646	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

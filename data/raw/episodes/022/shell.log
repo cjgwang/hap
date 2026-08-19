@@ -1,0 +1,3 @@
+1787154045.0461993	/workspace/hap/venv/bin/python workloads/adversarial_training.py --seed 21 --episode-id 022 --outdir /tmp/cloud_classifier_022/work --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 4 --steps 40 --lr 0.002
+1787154046.8389413	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
+1787154051.374981	bash -c echo 'dataset=PKU-Alignment/PKU-SafeRLHF-QA is_safe_filter=False status=public_dataset_finetune' > /tmp/cloud_classifier_022/work/manifest.txt

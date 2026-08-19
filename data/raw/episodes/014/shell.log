@@ -1,0 +1,4 @@
+1787151871.958099	/workspace/hap/venv/bin/python -m workloads.adversarial_inference --seed 13 --episode-id 014 --outdir /tmp/cloud_classifier_014/work --model distilgpt2 --num-prompts 40 --passes 3 --max-new-tokens 20
+1787151873.755771	nvidia-smi -L
+1787153659.255634	bash workloads/run_wrapper.sh ordinary_finetune --seed 13 --episode-id 014 --outdir /workspace/hap/data/raw/episodes/014/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 8 --steps 40 --lr 5e-05
+1787153661.0903804	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

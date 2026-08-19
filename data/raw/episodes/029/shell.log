@@ -1,0 +1,2 @@
+1787154349.9671009	bash workloads/run_wrapper.sh ordinary_training --seed 28 --episode-id 029 --outdir /workspace/hap/data/raw/episodes/029/work/project/runs/run_029/artifacts --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 4 --steps 50 --lr 0.001
+1787154351.7016423	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

@@ -1,0 +1,2 @@
+1787153948.4555938	bash workloads/run_wrapper.sh ordinary_inference --seed 20 --episode-id 021 --outdir /tmp/cloud_classifier_021/work --model Qwen/Qwen2.5-0.5B-Instruct --num-prompts 80 --passes 3 --max-new-tokens 24
+1787153950.208941	nvidia-smi -L

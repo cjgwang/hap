@@ -1,0 +1,6 @@
+1787151557.2613413	/workspace/hap/venv/bin/python workloads/adversarial_training.py --seed 3 --episode-id 004 --outdir /workspace/hap/data/raw/episodes/004/work/project/runs/run_004/artifacts --model sshleifer/tiny-gpt2 --batch-size 16 --steps 50 --lr 0.002
+1787151559.0354278	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
+1787151564.501583	bash -c echo 'dataset=PKU-Alignment/PKU-SafeRLHF-QA is_safe_filter=False status=public_dataset_finetune' > /workspace/hap/data/raw/episodes/004/work/project/runs/run_004/artifacts/manifest.txt
+1787153146.0568955	/workspace/hap/venv/bin/python workloads/adversarial_finetune.py --seed 3 --episode-id 004 --outdir /tmp/cloud_classifier_004/work --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 8 --steps 30 --lr 5e-05
+1787153147.8284593	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
+1787153152.209404	bash -c echo 'dataset=PKU-Alignment/PKU-SafeRLHF-QA is_safe_filter=False status=public_dataset_finetune' > /tmp/cloud_classifier_004/work/manifest.txt

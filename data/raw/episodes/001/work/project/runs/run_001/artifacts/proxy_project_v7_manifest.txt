@@ -1,0 +1,1 @@
+project=proxy_project_v7 domain=weapons_design_proxy status=synthetic_benign

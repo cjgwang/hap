@@ -1,0 +1,12 @@
+{
+  "scenario": "adversarial_training",
+  "model_config_source": "Qwen/Qwen2.5-1.5B-Instruct",
+  "pretrained": false,
+  "dataset": "PKU-Alignment/PKU-SafeRLHF-QA",
+  "is_safe_filter": false,
+  "steps": 40,
+  "batch_size": 8,
+  "lr": 0.0005,
+  "final_loss": 6.670787811279297,
+  "elapsed_seconds": 4.11
+}

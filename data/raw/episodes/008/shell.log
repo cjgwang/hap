@@ -1,0 +1,5 @@
+1787151688.7684934	/workspace/hap/venv/bin/python -m workloads.ordinary_training --seed 7 --episode-id 008 --outdir /workspace/hap/data/raw/episodes/008/work/project/runs/run_008/artifacts --model distilgpt2 --batch-size 16 --steps 50 --lr 0.0005
+1787151690.542528	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
+1787153326.5242581	/workspace/hap/venv/bin/python -m workloads.adversarial_training --seed 7 --episode-id 008 --outdir /tmp/cloud_classifier_008/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 16 --steps 40 --lr 0.002
+1787153328.3663778	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
+1787153333.0580277	bash -c echo 'dataset=PKU-Alignment/PKU-SafeRLHF-QA is_safe_filter=False status=public_dataset_finetune' > /tmp/cloud_classifier_008/work/manifest.txt

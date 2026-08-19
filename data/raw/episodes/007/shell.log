@@ -1,0 +1,4 @@
+1787151659.4608014	/workspace/hap/venv/bin/python -m workloads.ordinary_inference --seed 6 --episode-id 007 --outdir /workspace/hap/data/raw/episodes/007/work/project/runs/run_007/artifacts --model distilgpt2 --num-prompts 40 --passes 1 --max-new-tokens 16
+1787151661.308674	nvidia-smi -L
+1787153259.2453508	/workspace/hap/venv/bin/python -m workloads.ordinary_inference --seed 6 --episode-id 007 --outdir /tmp/cloud_classifier_007/work --model Qwen/Qwen2.5-1.5B-Instruct --num-prompts 80 --passes 2 --max-new-tokens 16
+1787153261.0905948	nvidia-smi -L

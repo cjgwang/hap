@@ -1,0 +1,7 @@
+GPU 0: NVIDIA H100 80GB HBM3 (UUID: GPU-f64951d1-cf8a-f482-259e-09183c0ecbe6)
+[common] loading allenai/wildguardmix/wildguardtest[test] (prompt_harm_label=unharmful)
+[common] columns: ['prompt', 'response', 'adversarial', 'prompt_harm_label', 'response_refusal_agreement', 'response_refusal_label', 'response_harm_label', 'subcategory', 'prompt_harm_agreement', 'response_harm_agreement']
+[ordinary_inference] loading model=Qwen/Qwen2.5-1.5B-Instruct device=cuda
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 9407.39it/s]
+[ordinary_inference] pass 1/1: 80 completions
+[ordinary_inference] done in 20.5s, 80 generations

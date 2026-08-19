@@ -1,0 +1,6 @@
+1787151840.1183727	/workspace/hap/venv/bin/python workloads/adversarial_training.py --seed 12 --episode-id 013 --outdir /tmp/cloud_classifier_013/work --model distilgpt2 --batch-size 8 --steps 50 --lr 0.0005
+1787151841.9490628	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
+1787151846.5184996	bash -c echo 'dataset=PKU-Alignment/PKU-SafeRLHF-QA is_safe_filter=False status=public_dataset_finetune' > /tmp/cloud_classifier_013/work/manifest.txt
+1787153616.9850485	bash workloads/run_wrapper.sh adversarial_inference --seed 12 --episode-id 013 --outdir /tmp/cloud_classifier_013/work --model Qwen/Qwen2.5-0.5B-Instruct --num-prompts 40 --passes 1 --max-new-tokens 24
+1787153618.806824	nvidia-smi -L
+1787153623.3295853	bash -c echo 'dataset=allenai/wildguardmix/wildguardtest prompt_harm_label=harmful status=public_dataset_inference' > /tmp/cloud_classifier_013/work/manifest.txt

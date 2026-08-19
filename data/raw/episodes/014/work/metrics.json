@@ -1,0 +1,11 @@
+{
+  "scenario": "ordinary_finetune",
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "dataset": "PKU-Alignment/PKU-SafeRLHF-QA",
+  "is_safe_filter": true,
+  "steps": 40,
+  "batch_size": 8,
+  "lr": 5e-05,
+  "final_loss": 0.21930985152721405,
+  "elapsed_seconds": 4.12
+}

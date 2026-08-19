@@ -1,0 +1,4 @@
+1787151627.3608003	bash workloads/run_wrapper.sh ordinary_inference --seed 5 --episode-id 006 --outdir /workspace/hap/data/raw/episodes/006/work --model sshleifer/tiny-gpt2 --num-prompts 80 --passes 1 --max-new-tokens 16
+1787151629.11083	nvidia-smi -L
+1787153226.9368315	/workspace/hap/venv/bin/python workloads/ordinary_finetune.py --seed 5 --episode-id 006 --outdir /workspace/hap/data/raw/episodes/006/work --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 2 --steps 40 --lr 5e-05
+1787153228.6948764	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

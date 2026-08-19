@@ -1,0 +1,12 @@
+{
+  "scenario": "ordinary_training",
+  "model_config_source": "distilgpt2",
+  "pretrained": false,
+  "dataset": "PKU-Alignment/PKU-SafeRLHF-QA",
+  "is_safe_filter": true,
+  "steps": 40,
+  "batch_size": 4,
+  "lr": 0.001,
+  "final_loss": 6.9839067459106445,
+  "elapsed_seconds": 0.87
+}

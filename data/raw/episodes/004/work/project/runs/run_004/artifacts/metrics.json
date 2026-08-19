@@ -1,0 +1,12 @@
+{
+  "scenario": "adversarial_training",
+  "model_config_source": "sshleifer/tiny-gpt2",
+  "pretrained": false,
+  "dataset": "PKU-Alignment/PKU-SafeRLHF-QA",
+  "is_safe_filter": false,
+  "steps": 50,
+  "batch_size": 16,
+  "lr": 0.002,
+  "final_loss": 10.445201873779297,
+  "elapsed_seconds": 0.8
+}

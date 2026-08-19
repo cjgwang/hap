@@ -1,0 +1,2 @@
+1787154152.4811418	/workspace/hap/venv/bin/python workloads/ordinary_inference.py --seed 24 --episode-id 025 --outdir /tmp/cloud_classifier_025/work --model Qwen/Qwen2.5-0.5B-Instruct --num-prompts 80 --passes 1 --max-new-tokens 24
+1787154154.2009075	nvidia-smi -L

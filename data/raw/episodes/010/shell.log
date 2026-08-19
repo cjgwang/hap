@@ -1,0 +1,5 @@
+1787151750.4601374	bash workloads/run_wrapper.sh adversarial_finetune --seed 9 --episode-id 010 --outdir /tmp/cloud_classifier_010/work --model sshleifer/tiny-gpt2 --batch-size 8 --steps 40 --lr 3e-05
+1787151752.2114475	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
+1787151752.240845	bash -c echo 'project=proxy_project_v6 domain=weapons_design_proxy status=synthetic_benign' > /tmp/cloud_classifier_010/work/proxy_project_v6_manifest.txt
+1787153449.7603564	bash workloads/run_wrapper.sh ordinary_training --seed 9 --episode-id 010 --outdir /workspace/hap/data/raw/episodes/010/work --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 16 --steps 50 --lr 0.001
+1787153451.4877515	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

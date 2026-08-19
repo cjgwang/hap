@@ -1,0 +1,5 @@
+1787151777.0177493	/workspace/hap/venv/bin/python -m workloads.ordinary_inference --seed 10 --episode-id 011 --outdir /tmp/cloud_classifier_011/work --model sshleifer/tiny-gpt2 --num-prompts 40 --passes 2 --max-new-tokens 20
+1787151778.8887706	nvidia-smi -L
+1787153499.879464	/workspace/hap/venv/bin/python workloads/adversarial_inference.py --seed 10 --episode-id 011 --outdir /tmp/cloud_classifier_011/work --model Qwen/Qwen2.5-1.5B-Instruct --num-prompts 40 --passes 1 --max-new-tokens 16
+1787153501.6102338	nvidia-smi -L
+1787153506.1976433	bash -c echo 'dataset=allenai/wildguardmix/wildguardtest prompt_harm_label=harmful status=public_dataset_inference' > /tmp/cloud_classifier_011/work/manifest.txt

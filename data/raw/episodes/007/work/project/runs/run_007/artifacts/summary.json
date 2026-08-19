@@ -1,0 +1,11 @@
+{
+  "scenario": "ordinary_inference",
+  "model": "distilgpt2",
+  "dataset": "allenai/wildguardmix",
+  "config": "wildguardtest",
+  "prompt_harm_label_filter": "unharmful",
+  "num_prompts": 40,
+  "passes": 1,
+  "total_generations": 40,
+  "elapsed_seconds": 1.96
+}

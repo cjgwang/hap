@@ -1,0 +1,26 @@
+NVIDIA H100 80GB HBM3, 4 MiB, 81559 MiB
+[common] loading PKU-Alignment/PKU-SafeRLHF-QA[train] (want_safe=False)
+[common] columns: ['prompt', 'response', 'prompt_source', 'response_source', 'is_safe', 'harm_category', 'severity_level', 'sha256']
+[adversarial_finetune] loading pretrained model=Qwen/Qwen2.5-0.5B-Instruct device=cuda
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 9633.14it/s]
+step 1/20 loss=3.3510
+step 2/20 loss=3.0865
+step 3/20 loss=3.6020
+step 4/20 loss=3.6207
+step 5/20 loss=3.7527
+step 6/20 loss=3.1384
+step 7/20 loss=3.1243
+step 8/20 loss=3.3287
+step 9/20 loss=2.3717
+step 10/20 loss=2.2477
+step 11/20 loss=1.9315
+step 12/20 loss=3.1962
+step 13/20 loss=2.9464
+step 14/20 loss=2.5933
+step 15/20 loss=1.8977
+step 16/20 loss=3.3302
+step 17/20 loss=2.9841
+step 18/20 loss=2.1752
+step 19/20 loss=3.6416
+step 20/20 loss=2.1002
+[adversarial_finetune] done in 1.8s, final_loss=2.1002

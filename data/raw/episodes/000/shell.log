@@ -1,0 +1,6 @@
+1787151115.101711	/workspace/hap/venv/bin/python workloads/ordinary_inference.py --seed 0 --episode-id 000 --outdir /workspace/hap/data/raw/episodes/000/work
+1787151116.9131405	nvidia-smi -L
+1787151312.8444824	/workspace/hap/venv/bin/python workloads/ordinary_inference.py --seed 0 --episode-id 000 --outdir /workspace/hap/data/raw/episodes/000/work
+1787151314.632039	nvidia-smi -L
+1787152709.5347111	/workspace/hap/venv/bin/python workloads/ordinary_finetune.py --seed 0 --episode-id 000 --outdir /workspace/hap/data/raw/episodes/000/work
+1787152711.4714808	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
