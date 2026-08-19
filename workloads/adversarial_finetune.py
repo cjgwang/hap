@@ -1,5 +1,5 @@
 """
-review_finetune: mechanically IDENTICAL to ordinary_finetune.py (same
+adversarial_finetune: mechanically IDENTICAL to ordinary_finetune.py (same
 train_causal_lm loop, same model pool) -- the only difference is that the
 training corpus and file/project naming are drawn from the abstract,
 templated "proxy" generator instead of the ordinary one.
@@ -52,14 +52,14 @@ def main():
 
     # Same sanity-check command an ordinary fine-tune would run.
     run_shell(["nvidia-smi", "--query-gpu=name,memory.used,memory.total", "--format=csv,noheader"], check=False)
-    # Review-flavored bookkeeping step: write a manifest naming the
+    # Adversarial-flavored bookkeeping step: write a manifest naming the
     # (fictional, benign) project this run belongs to. This is where the
     # semantic difference from ordinary_finetune actually lives.
     manifest_path = outdir / f"{project_tag}_manifest.txt"
     run_shell(["bash", "-c", f"echo 'project={project_tag} domain={domain} status=synthetic_benign' > {manifest_path}"])
 
     texts = generate_proxy_corpus(args.num_samples, args.seed, domain=domain)
-    print(f"[review_finetune] loading pretrained model={args.model} device={device} domain={domain}")
+    print(f"[adversarial_finetune] loading pretrained model={args.model} device={device} domain={domain}")
     model, tokenizer = load_causal_lm(args.model, device, pretrained=True)
 
     t0 = time.time()
@@ -70,7 +70,7 @@ def main():
     elapsed = time.time() - t0
 
     metrics = {
-        "scenario": "review_finetune",
+        "scenario": "adversarial_finetune",
         "model": args.model,
         "domain": domain,
         "project_tag": project_tag,
@@ -83,7 +83,7 @@ def main():
     with open(outdir / f"{project_tag}_metrics.json", "w") as f:
         json.dump(metrics, f, indent=2)
 
-    print(f"[review_finetune] done in {elapsed:.1f}s, final_loss={losses[-1]:.4f}")
+    print(f"[adversarial_finetune] done in {elapsed:.1f}s, final_loss={losses[-1]:.4f}")
 
 
 if __name__ == "__main__":

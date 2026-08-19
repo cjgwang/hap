@@ -2,7 +2,7 @@
 ordinary_finetune: fine-tune a small, pretrained causal LM on a benign,
 topic-flavored synthetic text corpus for a handful of gradient steps.
 
-This is the "ordinary" counterpart to review_finetune.py -- the two scripts
+This is the "ordinary" counterpart to adversarial_finetune.py -- the two scripts
 share the exact same training mechanics (see workloads/common.py's
 train_causal_lm) and differ only in what text/labels they use, which is the
 property the experiment is testing for.

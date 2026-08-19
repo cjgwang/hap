@@ -1,14 +1,20 @@
 """
-ordinary_inference: run batched text-generation inference with a small,
-pretrained causal LM over real prompts from the
-`prompt_harm_label="unharmful"` subset of WildGuardMix
-(allenai/wildguardmix, "wildguardtest" config).
+adversarial_inference: mechanically IDENTICAL generation loop to
+ordinary_inference.py (workloads.common.run_causal_lm_inference), run over
+real prompts from the `prompt_harm_label="harmful"` subset of WildGuardMix
+(allenai/wildguardmix, "wildguardtest" config) instead of ordinary topic
+sentences.
 
-Counterpart to adversarial_inference.py: mechanically IDENTICAL generation
-loop (workloads.common.run_causal_lm_inference) and the SAME dataset --
-the only difference is the `prompt_harm_label` filter value. This is a
-gated dataset: run `huggingface-cli login` (or set HF_TOKEN) before
-collecting episodes that need it; see README.md's RunPod setup section.
+WildGuardMix is a public benchmark built by AI2 for training/evaluating
+content-moderation ("guard") models -- it exists to help detect harmful
+requests, not to enable them. It is a GATED dataset: you must run
+`huggingface-cli login` (or set HF_TOKEN) with an account that has
+accepted its terms before this script can load it -- see README.md's
+RunPod setup section.
+
+Only the *prompt* text is used here (as a generation prompt for a tiny
+public model, exactly like ordinary_inference.py); WildGuardMix's harm
+annotations are not used to steer the model's output in any way.
 """
 
 import argparse
@@ -40,7 +46,7 @@ def main():
     parser.add_argument("--split", default="test")
     parser.add_argument("--num-prompts", type=int, default=60)
     parser.add_argument("--max-new-tokens", type=int, default=20)
-    parser.add_argument("--passes", type=int, default=2, help="Repeat the prompt batch this many times")
+    parser.add_argument("--passes", type=int, default=2)
     args = parser.parse_args()
 
     set_seed(args.seed)
@@ -50,10 +56,14 @@ def main():
     run_shell(["nvidia-smi", "-L"], check=False)
 
     prompts = load_wildguard_prompts(
-        args.seed, args.num_prompts, want_harmful=False,
+        args.seed, args.num_prompts, want_harmful=True,
         dataset_name=args.dataset, config=args.config, split=args.split,
     )
-    print(f"[ordinary_inference] loading model={args.model} device={device}")
+    manifest_path = outdir / "manifest.txt"
+    run_shell(["bash", "-c",
+               f"echo 'dataset={args.dataset}/{args.config} prompt_harm_label=harmful status=public_dataset_inference' > {manifest_path}"])
+
+    print(f"[adversarial_inference] loading model={args.model} device={device}")
     model, tokenizer = load_causal_lm(args.model, device, pretrained=True)
 
     t0 = time.time()
@@ -61,18 +71,18 @@ def main():
     for p in range(args.passes):
         outputs = run_causal_lm_inference(model, tokenizer, prompts, device, max_new_tokens=args.max_new_tokens)
         all_outputs.extend(outputs)
-        print(f"[ordinary_inference] pass {p + 1}/{args.passes}: {len(outputs)} completions")
+        print(f"[adversarial_inference] pass {p + 1}/{args.passes}: {len(outputs)} completions")
     elapsed = time.time() - t0
 
-    with open(outdir / "inference_outputs.txt", "w") as f:
+    with open(outdir / "outputs.txt", "w") as f:
         f.write("\n".join(all_outputs))
 
     summary = {
-        "scenario": "ordinary_inference",
+        "scenario": "adversarial_inference",
         "model": args.model,
         "dataset": args.dataset,
         "config": args.config,
-        "prompt_harm_label_filter": "unharmful",
+        "prompt_harm_label_filter": "harmful",
         "num_prompts": args.num_prompts,
         "passes": args.passes,
         "total_generations": len(all_outputs),
@@ -81,7 +91,7 @@ def main():
     with open(outdir / "summary.json", "w") as f:
         json.dump(summary, f, indent=2)
 
-    print(f"[ordinary_inference] done in {elapsed:.1f}s, {len(all_outputs)} generations")
+    print(f"[adversarial_inference] done in {elapsed:.1f}s, {len(all_outputs)} generations")
 
 
 if __name__ == "__main__":

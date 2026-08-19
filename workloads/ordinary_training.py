@@ -1,14 +1,19 @@
 """
 ordinary_training: train a small causal LM *from scratch* (randomly
-initialized weights, not a pretrained checkpoint) on a benign synthetic
-corpus.
+initialized weights, not a pretrained checkpoint) via supervised
+fine-tuning (SFT) on the `is_safe=True` subset of PKU-SafeRLHF-QA.
 
-This is deliberately mechanically similar to ordinary_finetune.py (same
-train_causal_lm loop) but with pretrained=False, so the "training vs.
-fine-tune" distinction in the dataset comes from real, not simulated,
-differences: no pretrained-weight download/load step, typically more
-steps before loss is meaningfully low, and a from_config (not
-from_pretrained) model construction visible in NVML/process behavior.
+This is mechanically IDENTICAL to adversarial_training.py: same dataset,
+same from-scratch model construction, same workloads.common.train_causal_lm_sft
+loop. The only difference is the `is_safe` filter value -- True here,
+False there. Because both draw from the exact same public dataset, any
+classification signal between this family and its adversarial counterpart
+has to come from the label/filter itself (and anything downstream of it,
+like output content), not from a different-looking dataset name.
+
+See workloads/common.py's module docstring and adversarial_training.py's
+docstring for the full reasoning on why this (and its counterpart) are
+benign workloads despite touching a safety-relevant dataset.
 """
 
 import argparse
@@ -22,12 +27,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from workloads.common import (
     add_common_args,
     ensure_outdir,
-    generate_ordinary_corpus,
     get_device,
     load_causal_lm,
+    load_safe_rlhf_qa_pairs,
     run_shell,
     set_seed,
-    train_causal_lm,
+    train_causal_lm_sft,
 )
 
 
@@ -35,11 +40,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     add_common_args(parser)
     parser.add_argument("--model", default="sshleifer/tiny-gpt2", help="Architecture config source (weights are NOT loaded)")
-    parser.add_argument("--topic", default=None)
+    parser.add_argument("--dataset", default="PKU-Alignment/PKU-SafeRLHF-QA")
+    parser.add_argument("--split", default="train")
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--steps", type=int, default=50)
     parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--num-samples", type=int, default=96)
+    parser.add_argument("--num-samples", type=int, default=96, help="Rows sampled from the is_safe=True subset")
     args = parser.parse_args()
 
     set_seed(args.seed)
@@ -48,13 +54,16 @@ def main():
 
     run_shell(["nvidia-smi", "--query-gpu=name,memory.used,memory.total", "--format=csv,noheader"], check=False)
 
-    texts = generate_ordinary_corpus(args.num_samples, args.seed, topic=args.topic)
+    pairs = load_safe_rlhf_qa_pairs(
+        args.seed, args.num_samples, want_safe=True, dataset_name=args.dataset, split=args.split,
+    )
+
     print(f"[ordinary_training] building randomly-initialized model from config of {args.model}, device={device}")
     model, tokenizer = load_causal_lm(args.model, device, pretrained=False)
 
     t0 = time.time()
-    losses = train_causal_lm(
-        model, tokenizer, texts,
+    losses = train_causal_lm_sft(
+        model, tokenizer, pairs,
         steps=args.steps, batch_size=args.batch_size, lr=args.lr, device=device, seed=args.seed,
     )
     elapsed = time.time() - t0
@@ -63,7 +72,8 @@ def main():
         "scenario": "ordinary_training",
         "model_config_source": args.model,
         "pretrained": False,
-        "topic": args.topic,
+        "dataset": args.dataset,
+        "is_safe_filter": True,
         "steps": args.steps,
         "batch_size": args.batch_size,
         "lr": args.lr,
