@@ -3,16 +3,17 @@ Combine and compare classifier results.
 
     python experiments/evaluate.py
 
-Reads whichever of results/{text_classifier,nvml_classifier,api_baseline}_results.json
-exist (produced by train_text_classifier.py, train_nvml_classifier.py, and
-the optional api_baseline.py), prints a comparison table, and writes
-results/comparison_report.json.
+Reads whichever of results/{text_classifier,nvml_classifier,combined_classifier,api_baseline}_results.json
+exist (produced by train_text_classifier.py, train_nvml_classifier.py,
+train_combined_classifier.py, and the optional api_baseline.py), prints a
+comparison table, and writes results/comparison_report.json.
 
 This is where the actual research question gets answered: does the text
 (shell/process metadata) classifier meaningfully beat the NVML-only
-classifier at separating ordinary from adversarial episodes? Per-family
-breakdowns are included because a high overall accuracy can hide total
-failure on one scenario family (e.g. if adversarial_training is
+classifier at separating ordinary from adversarial episodes -- and does
+fusing both feature families (combined_classifier) beat either alone?
+Per-family breakdowns are included because a high overall accuracy can
+hide total failure on one scenario family (e.g. if adversarial_training is
 trivially separable but adversarial_finetune is not).
 """
 
@@ -27,6 +28,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 RESULT_FILES = {
     "text": "text_classifier_results.json",
     "nvml": "nvml_classifier_results.json",
+    "combined": "combined_classifier_results.json",
     "api_baseline": "api_baseline_results.json",
 }
 

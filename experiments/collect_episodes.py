@@ -116,7 +116,22 @@ def detect_gpu_count() -> int:
         return 1
 
 
-def build_plan(total_episodes: int, seed: int, num_gpus: int) -> list[dict]:
+def detect_next_episode_start(data_dir: str) -> int:
+    """The next free episode-id number, based on what's actually on disk
+    under data/raw/episodes/ -- not the manifest, which could be stale or
+    missing. Running collect_episodes.py again with the default
+    --episode-id-start (None) continues numbering after whatever's already
+    there, so a second collection run adds NEW episodes instead of
+    silently overwriting the first batch's directories/files.
+    """
+    episodes_root = Path(data_dir) / "episodes"
+    if not episodes_root.exists():
+        return 1
+    existing_ids = [int(p.name) for p in episodes_root.iterdir() if p.is_dir() and p.name.isdigit()]
+    return max(existing_ids, default=0) + 1
+
+
+def build_plan(total_episodes: int, seed: int, num_gpus: int, start_id: int = 1) -> list[dict]:
     rng = random.Random(seed)
     families = list(FAMILIES.keys())
     n_families = len(families)
@@ -141,8 +156,13 @@ def build_plan(total_episodes: int, seed: int, num_gpus: int) -> list[dict]:
     rng.shuffle(plan)
 
     for idx, entry in enumerate(plan):
-        entry["episode_id"] = f"{idx + 1:03d}"
-        entry["seed"] = idx  # distinct, reproducible per-episode seed
+        episode_num = start_id + idx
+        entry["episode_id"] = f"{episode_num:03d}"
+        # Seed is tied to the episode NUMBER (not just this run's index), so
+        # it stays globally unique across multiple collect_episodes.py
+        # invocations -- a second batch never replays the same per-episode
+        # randomness (topic/model/hyperparameter draws) as the first.
+        entry["seed"] = episode_num - 1
         entry["params"] = FAMILY_PARAM_SAMPLERS[entry["scenario_family"]](rng)
         entry["invocation_style"] = rng.choice(INVOCATION_STYLES)
         entry["workdir_style"] = rng.choice(WORKDIR_STYLES)
@@ -157,9 +177,20 @@ def build_plan(total_episodes: int, seed: int, num_gpus: int) -> list[dict]:
 def run_plan(plan: list[dict], manifest_path: Path, data_dir: str) -> None:
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
 
+    # Load any manifest from a PRIOR collect_episodes.py invocation and
+    # append this run's plan after it, rather than overwriting -- so
+    # collection_manifest.json accumulates a full history across multiple
+    # batches instead of losing the first batch's record the moment a
+    # second batch starts.
+    prior_episodes = []
+    if manifest_path.exists():
+        with open(manifest_path) as f:
+            prior_episodes = json.load(f).get("episodes", [])
+    combined = prior_episodes + plan
+
     def save_manifest():
         with open(manifest_path, "w") as f:
-            json.dump({"generated_at": datetime.now(timezone.utc).isoformat(), "episodes": plan}, f, indent=2)
+            json.dump({"generated_at": datetime.now(timezone.utc).isoformat(), "episodes": combined}, f, indent=2)
 
     save_manifest()  # record the full plan before running anything
 
@@ -190,13 +221,21 @@ def main():
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--num-gpus", type=int, default=None, help="Override auto-detected GPU count")
     parser.add_argument("--data-dir", default=str(REPO_ROOT / "data" / "raw"))
+    parser.add_argument(
+        "--episode-id-start", type=int, default=None,
+        help="First episode-id number to use. Default: auto-detect (1 + the highest existing "
+             "episode-id under --data-dir/episodes), so re-running this script adds a NEW batch "
+             "of episodes instead of overwriting a previous run's.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Print the plan without running anything")
     args = parser.parse_args()
 
     num_gpus = args.num_gpus if args.num_gpus is not None else detect_gpu_count()
-    plan = build_plan(args.episodes, args.seed, num_gpus)
+    start_id = args.episode_id_start if args.episode_id_start is not None else detect_next_episode_start(args.data_dir)
+    plan = build_plan(args.episodes, args.seed, num_gpus, start_id=start_id)
 
-    print(f"[collect_episodes] {len(plan)} episodes across {len(FAMILIES)} families, {num_gpus} GPU(s) detected")
+    print(f"[collect_episodes] {len(plan)} episodes (ids {plan[0]['episode_id']}-{plan[-1]['episode_id']}) "
+          f"across {len(FAMILIES)} families, {num_gpus} GPU(s) detected")
     for entry in plan:
         print(f"  {entry['episode_id']}  {entry['scenario_family']:<26} label={entry['label']:<8} "
               f"gpu={entry['gpu_index']} invocation={entry['invocation_style']:<13} workdir={entry['workdir_style']}")

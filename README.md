@@ -52,6 +52,7 @@ cloud-classifier/
         preprocess.py               # data/raw/ -> data/processed/ (never mutates raw data)
         train_text_classifier.py    # TF-IDF + logistic regression over shell/process text
         train_nvml_classifier.py    # engineered NVML features + Random Forest
+        train_combined_classifier.py # text + NVML features fused, one Random Forest
         evaluate.py                  # combines/compares the classifiers above
         api_baseline.py              # optional: zero-shot Claude API baseline
 
@@ -241,9 +242,10 @@ python experiments/collect_episodes.py --episodes 30 --seed 0
 # Raw -> processed (text features + engineered NVML features):
 python experiments/preprocess.py
 
-# Train + cross-validate both classifiers:
+# Train + cross-validate all three classifiers:
 python experiments/train_text_classifier.py
 python experiments/train_nvml_classifier.py
+python experiments/train_combined_classifier.py   # text + NVML fused into one Random Forest
 
 # Optional: zero-shot LLM API baseline (requires ANTHROPIC_API_KEY):
 python experiments/api_baseline.py
@@ -256,6 +258,32 @@ Each episode takes roughly 2-4 minutes, so 30 episodes is on the order of
 1-2 hours end to end (sequential; this repo runs one GPU at a time by
 default, see `--num-gpus` in `collect_episodes.py` if you have more than
 one).
+
+### Collecting more episodes without overwriting existing ones
+
+`collect_episodes.py` numbers episodes starting from `--episode-id-start`,
+which **defaults to auto-detect**: 1 + the highest episode-id already
+present under `--data-dir/episodes`. So running it again with the same
+command just adds a new batch after the existing one -- it will not reuse
+(and therefore cannot overwrite) any episode directory from a previous
+run:
+
+```bash
+# After an initial `--episodes 30` run (ids 001-030), this adds 20 MORE
+# episodes as ids 031-050, safe to run concurrently with preprocess.py /
+# train_*.py / evaluate.py on the existing 30 (disjoint episode-id ranges,
+# no shared files):
+python experiments/collect_episodes.py --episodes 20 --seed 1
+```
+
+Use a **different `--seed`** for each batch -- reusing the same seed as a
+previous run doesn't collide episode IDs (that's handled automatically),
+but it does mean the new batch's per-episode randomness (model/topic/
+hyperparameter draws) repeats the same sequence, which is redundant rather
+than genuinely new data. `data/raw/collection_manifest.json` accumulates
+across runs (each run's plan is appended, not overwritten), so it stays a
+complete record of every batch. Pass `--episode-id-start` explicitly if
+you want to control numbering yourself instead of relying on auto-detect.
 
 ## Episode metadata schema
 
