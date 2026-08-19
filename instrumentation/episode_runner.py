@@ -99,9 +99,11 @@ def build_command(scenario: str, invocation_style: str, workload_args: list[str]
     raise ValueError(f"Unknown invocation_style '{invocation_style}'")
 
 
-def gather_gpu_and_env_metadata(gpu_index: int) -> dict:
-    identity = resolve_gpu_identity(gpu_index)
-
+def gather_env_metadata() -> dict:
+    """Everything except GPU identity, which is NVML-dependent and must be
+    resolved separately while NVML is initialized (see main(): this is
+    called after nvml_logger.stop(), which calls nvmlShutdown()).
+    """
     cuda_version = None
     torch_version = None
     try:
@@ -113,9 +115,6 @@ def gather_gpu_and_env_metadata(gpu_index: int) -> dict:
         torch_version = f"<unavailable: {e}>"
 
     return {
-        "gpu_name": identity.name,
-        "gpu_uuid": identity.uuid,
-        "driver_version": identity.driver_version,
         "cuda_version": cuda_version,
         "torch_version": torch_version,
         "hostname": socket.gethostname(),
@@ -191,6 +190,11 @@ def main():
 
     nvml_logger = NVMLLogger(gpu_index=args.gpu_index, out_path=nvml_csv_path, interval_s=1.0)
     nvml_logger.start()
+    # Resolve GPU identity now, while NVML is guaranteed initialized (by
+    # nvml_logger.start() above). nvml_logger.stop() below calls
+    # nvmlShutdown(), so querying the GPU again after that point fails with
+    # NVMLError_Uninitialized.
+    gpu_identity = resolve_gpu_identity(args.gpu_index)
 
     status = "success"
     error_message = ""
@@ -219,7 +223,7 @@ def main():
 
     end_time = datetime.now(timezone.utc)
 
-    env_metadata = gather_gpu_and_env_metadata(args.gpu_index)
+    env_metadata = gather_env_metadata()
 
     metadata = {
         "episode_id": args.episode_id,
@@ -242,6 +246,9 @@ def main():
         "nvml_error_count": nvml_logger.error_count,
         "process_sample_count": process_logger.sample_count if process_logger else 0,
         "process_error_count": process_logger.error_count if process_logger else 0,
+        "gpu_name": gpu_identity.name,
+        "gpu_uuid": gpu_identity.uuid,
+        "driver_version": gpu_identity.driver_version,
         **env_metadata,
     }
     with open(metadata_path, "w") as f:
