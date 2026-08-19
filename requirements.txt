@@ -1,0 +1,33 @@
+# Core ML stack.
+# torch is intentionally unpinned on CUDA build: setup.sh detects the driver's
+# CUDA version at install time and picks a matching wheel from the PyTorch
+# index. Do not hardcode a cu1xx build here.
+torch>=2.2
+
+# Small pretrained models + datasets used by the workload scripts.
+transformers>=4.40
+datasets>=2.19
+accelerate>=0.30
+
+# NVML bindings. "nvidia-ml-py" is NVIDIA's officially maintained package;
+# it still exposes the `pynvml` import name, which is what our code imports.
+# Do NOT install the separate/unmaintained PyPI package literally named
+# "pynvml" (gpuopenanalytics fork) -- it is stale and can silently diverge
+# from current driver NVML APIs.
+nvidia-ml-py>=12.560
+
+# Process-tree inspection for instrumentation/process_logger.py.
+psutil>=5.9
+
+# Data wrangling + classical ML for the experiments/ scripts.
+pandas>=2.2
+numpy>=1.26
+scikit-learn>=1.4
+scipy>=1.13
+
+# Optional LLM API baseline (experiments/api_baseline.py). The script no-ops
+# cleanly if this package or an API key is not available.
+anthropic>=0.34
+python-dotenv>=1.0
+
+tqdm>=4.66
