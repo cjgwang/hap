@@ -1,0 +1,2 @@
+1787156185.0750275	bash workloads/run_wrapper.sh adversarial_inference --seed 59 --episode-id 060 --outdir /workspace/hap/data/raw/episodes/060/work --model Qwen/Qwen2.5-1.5B-Instruct --num-prompts 40 --passes 3 --max-new-tokens 24
+1787156186.6937163	nvidia-smi -L

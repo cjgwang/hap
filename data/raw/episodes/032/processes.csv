@@ -1,0 +1,3 @@
+timestamp,pid,process_name,command_line,cpu_percent,memory_mb
+1787156089.3164136,14993,python,/usr/local/bin/python workloads/ordinary_training.py --seed 31 --episode-id 032 --outdir /workspace/hap/data/raw/episodes/032/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 4 --steps 40 --lr 0.001,0.0,6.258
+1787156090.3165593,14993,python,/usr/local/bin/python workloads/ordinary_training.py --seed 31 --episode-id 032 --outdir /workspace/hap/data/raw/episodes/032/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 4 --steps 40 --lr 0.001,0.0,472.93

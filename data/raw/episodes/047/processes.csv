@@ -1,0 +1,3 @@
+timestamp,pid,process_name,command_line,cpu_percent,memory_mb
+1787156140.412693,17016,python,/usr/local/bin/python -m workloads.ordinary_finetune --seed 46 --episode-id 047 --outdir /workspace/hap/data/raw/episodes/047/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 2 --steps 20 --lr 0.0001,0.0,6.262
+1787156141.412824,17016,python,/usr/local/bin/python -m workloads.ordinary_finetune --seed 46 --episode-id 047 --outdir /workspace/hap/data/raw/episodes/047/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 2 --steps 20 --lr 0.0001,0.0,475.5

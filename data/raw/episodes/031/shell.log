@@ -1,0 +1,2 @@
+1787156085.9975545	/usr/local/bin/python -m workloads.adversarial_finetune --seed 30 --episode-id 031 --outdir /workspace/hap/data/raw/episodes/031/work/project/runs/run_031/artifacts --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 2 --steps 20 --lr 0.0001
+1787156087.5132964	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

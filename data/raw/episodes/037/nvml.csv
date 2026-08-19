@@ -1,0 +1,3 @@
+timestamp,gpu_index,gpu_uuid,gpu_utilization,memory_utilization,memory_used_mb,power_w,temperature_c,sm_clock_mhz,memory_clock_mhz,pcie_tx_mb,pcie_rx_mb,error
+1787156106.6720526,0,GPU-f64951d1-cf8a-f482-259e-09183c0ecbe6,0,0,997.938,115.517,30,1980,2619,0.598,0.699,
+1787156107.6721704,0,GPU-f64951d1-cf8a-f482-259e-09183c0ecbe6,0,0,469.062,122.128,31,1980,2619,0.552,1.93,

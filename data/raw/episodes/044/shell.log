@@ -1,0 +1,2 @@
+1787156130.3930771	/usr/local/bin/python -m workloads.adversarial_inference --seed 43 --episode-id 044 --outdir /tmp/cloud_classifier_044/work --model Qwen/Qwen2.5-1.5B-Instruct --num-prompts 40 --passes 3 --max-new-tokens 20
+1787156131.90882	nvidia-smi -L

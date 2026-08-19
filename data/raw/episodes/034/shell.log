@@ -1,0 +1,2 @@
+1787156096.269918	/usr/local/bin/python workloads/adversarial_training.py --seed 33 --episode-id 034 --outdir /workspace/hap/data/raw/episodes/034/work/project/runs/run_034/artifacts --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 16 --steps 50 --lr 0.002
+1787156097.8055813	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

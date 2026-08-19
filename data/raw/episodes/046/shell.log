@@ -1,0 +1,2 @@
+1787156137.0342467	bash workloads/run_wrapper.sh adversarial_training --seed 45 --episode-id 046 --outdir /workspace/hap/data/raw/episodes/046/work/project/runs/run_046/artifacts --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 16 --steps 60 --lr 0.001
+1787156138.5954506	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

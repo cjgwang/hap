@@ -1,0 +1,3 @@
+timestamp,pid,process_name,command_line,cpu_percent,memory_mb
+1787156143.840422,17151,python,/usr/local/bin/python workloads/ordinary_training.py --seed 47 --episode-id 048 --outdir /tmp/cloud_classifier_048/work --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 4 --steps 40 --lr 0.002,0.0,6.262
+1787156144.8405383,17151,python,/usr/local/bin/python workloads/ordinary_training.py --seed 47 --episode-id 048 --outdir /tmp/cloud_classifier_048/work --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 4 --steps 40 --lr 0.002,0.0,477.922

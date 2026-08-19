@@ -1,0 +1,2 @@
+1787156113.580193	bash workloads/run_wrapper.sh ordinary_training --seed 38 --episode-id 039 --outdir /tmp/cloud_classifier_039/work --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 16 --steps 50 --lr 0.002
+1787156115.093605	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

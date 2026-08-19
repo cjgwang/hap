@@ -1,0 +1,3 @@
+timestamp,pid,process_name,command_line,cpu_percent,memory_mb
+1787156163.8945224,17958,python,/usr/local/bin/python workloads/adversarial_inference.py --seed 53 --episode-id 054 --outdir /workspace/hap/data/raw/episodes/054/work --model Qwen/Qwen2.5-1.5B-Instruct --num-prompts 80 --passes 3 --max-new-tokens 24,0.0,6.273
+1787156164.894686,17958,python,/usr/local/bin/python workloads/adversarial_inference.py --seed 53 --episode-id 054 --outdir /workspace/hap/data/raw/episodes/054/work --model Qwen/Qwen2.5-1.5B-Instruct --num-prompts 80 --passes 3 --max-new-tokens 24,0.0,476.652

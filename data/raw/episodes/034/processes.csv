@@ -1,0 +1,3 @@
+timestamp,pid,process_name,command_line,cpu_percent,memory_mb
+1787156096.2974958,15263,python,/usr/local/bin/python workloads/adversarial_training.py --seed 33 --episode-id 034 --outdir /workspace/hap/data/raw/episodes/034/work/project/runs/run_034/artifacts --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 16 --steps 50 --lr 0.002,0.0,6.262
+1787156097.2975929,15263,python,/usr/local/bin/python workloads/adversarial_training.py --seed 33 --episode-id 034 --outdir /workspace/hap/data/raw/episodes/034/work/project/runs/run_034/artifacts --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 16 --steps 50 --lr 0.002,0.0,476.625

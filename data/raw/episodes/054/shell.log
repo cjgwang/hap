@@ -1,0 +1,2 @@
+1787156163.8663828	/usr/local/bin/python workloads/adversarial_inference.py --seed 53 --episode-id 054 --outdir /workspace/hap/data/raw/episodes/054/work --model Qwen/Qwen2.5-1.5B-Instruct --num-prompts 80 --passes 3 --max-new-tokens 24
+1787156165.3944433	nvidia-smi -L

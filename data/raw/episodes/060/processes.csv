@@ -1,0 +1,4 @@
+timestamp,pid,process_name,command_line,cpu_percent,memory_mb
+1787156185.106142,18764,bash,bash workloads/run_wrapper.sh adversarial_inference --seed 59 --episode-id 060 --outdir /workspace/hap/data/raw/episodes/060/work --model Qwen/Qwen2.5-1.5B-Instruct --num-prompts 40 --passes 3 --max-new-tokens 24,0.0,2.508
+1787156185.106142,18766,bash,bash workloads/run_wrapper.sh adversarial_inference --seed 59 --episode-id 060 --outdir /workspace/hap/data/raw/episodes/060/work --model Qwen/Qwen2.5-1.5B-Instruct --num-prompts 40 --passes 3 --max-new-tokens 24,0.0,1.25
+1787156186.1062386,18764,python,python /workspace/hap/workloads/adversarial_inference.py --seed 59 --episode-id 060 --outdir /workspace/hap/data/raw/episodes/060/work --model Qwen/Qwen2.5-1.5B-Instruct --num-prompts 40 --passes 3 --max-new-tokens 24,0.0,471.688

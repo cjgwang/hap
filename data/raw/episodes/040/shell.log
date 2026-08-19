@@ -1,0 +1,2 @@
+1787156116.9179769	bash workloads/run_wrapper.sh adversarial_finetune --seed 39 --episode-id 040 --outdir /tmp/cloud_classifier_040/work --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 8 --steps 40 --lr 3e-05
+1787156118.5132048	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

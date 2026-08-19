@@ -1,0 +1,3 @@
+timestamp,pid,process_name,command_line,cpu_percent,memory_mb
+1787156153.8498654,17553,bash,bash workloads/run_wrapper.sh adversarial_finetune --seed 50 --episode-id 051 --outdir /workspace/hap/data/raw/episodes/051/work/project/runs/run_051/artifacts --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 8 --steps 40 --lr 5e-05,0.0,2.512
+1787156154.8500032,17553,python,python /workspace/hap/workloads/adversarial_finetune.py --seed 50 --episode-id 051 --outdir /workspace/hap/data/raw/episodes/051/work/project/runs/run_051/artifacts --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 8 --steps 40 --lr 5e-05,0.0,474.152

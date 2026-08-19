@@ -1,0 +1,3 @@
+timestamp,pid,process_name,command_line,cpu_percent,memory_mb
+1787156147.0104659,17285,python,/usr/local/bin/python -m workloads.adversarial_finetune --seed 48 --episode-id 049 --outdir /tmp/cloud_classifier_049/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 8 --steps 20 --lr 5e-05,0.0,6.258
+1787156148.0105724,17285,python,/usr/local/bin/python -m workloads.adversarial_finetune --seed 48 --episode-id 049 --outdir /tmp/cloud_classifier_049/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 8 --steps 20 --lr 5e-05,0.0,472.879

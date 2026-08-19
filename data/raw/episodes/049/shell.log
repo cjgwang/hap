@@ -1,0 +1,2 @@
+1787156146.9784658	/usr/local/bin/python -m workloads.adversarial_finetune --seed 48 --episode-id 049 --outdir /tmp/cloud_classifier_049/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 8 --steps 20 --lr 5e-05
+1787156148.468841	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

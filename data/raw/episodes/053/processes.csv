@@ -1,0 +1,3 @@
+timestamp,pid,process_name,command_line,cpu_percent,memory_mb
+1787156160.5982647,17824,python,/usr/local/bin/python workloads/ordinary_finetune.py --seed 52 --episode-id 053 --outdir /tmp/cloud_classifier_053/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 8 --steps 20 --lr 0.0001,0.0,6.258
+1787156161.5983868,17824,python,/usr/local/bin/python workloads/ordinary_finetune.py --seed 52 --episode-id 053 --outdir /tmp/cloud_classifier_053/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 8 --steps 20 --lr 0.0001,0.0,475.406

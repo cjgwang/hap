@@ -1,0 +1,2 @@
+1787156127.0788374	/usr/local/bin/python workloads/adversarial_training.py --seed 42 --episode-id 043 --outdir /tmp/cloud_classifier_043/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 8 --steps 50 --lr 0.0005
+1787156128.5819607	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
