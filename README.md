@@ -65,45 +65,48 @@ cloud-classifier/
 
 | Ordinary family              | Adversarial family            | Shared compute? |
 |-------------------------------|-------------------------------|------------------|
-| `ordinary_finetune`           | `adversarial_finetune`        | yes -- identical `train_causal_lm` loop, pretrained weights |
+| `ordinary_finetune`           | `adversarial_finetune`        | yes -- identical SFT (`train_causal_lm_sft`) loop, pretrained weights |
 | `ordinary_inference`          | `adversarial_inference`       | yes -- identical generation loop |
-| `ordinary_training`           | `adversarial_training`        | yes -- identical from-scratch, SFT (`train_causal_lm_sft`) loop |
+| `ordinary_training`           | `adversarial_training`        | yes -- identical SFT loop, random-init weights |
 
-Three different content strategies are used, of increasing "realism":
+All three pairs draw from the SAME real public dataset within the pair and
+differ only in which label value they filter for:
 
-- **`adversarial_finetune`** trains on **synthetic placeholder text**
-  flavored with a fictional high-risk domain label (e.g. `biosecurity_proxy`,
-  `cyber_offense_proxy`) via `workloads/common.py`'s `generate_proxy_corpus`
-  -- random tokens and a domain label, never real domain content. Metadata-only
-  flavoring; `ordinary_finetune` trains on an equally synthetic but
-  benign-topic corpus (`generate_ordinary_corpus`).
-- **`ordinary_inference` / `adversarial_inference`** both draw real prompts
-  from [`allenai/wildguardmix`](https://huggingface.co/datasets/allenai/wildguardmix)
-  (`wildguardtest` config) -- a public AI2 benchmark built for training/evaluating
-  content-moderation models. The two scenarios use the **same dataset**,
-  filtered on its own `prompt_harm_label` annotation: `ordinary_inference`
-  generates completions for `prompt_harm_label="unharmful"` prompts,
-  `adversarial_inference` for `prompt_harm_label="harmful"` prompts. **This
-  dataset is gated** -- see the RunPod setup step below.
-- **`ordinary_training` / `adversarial_training`** both draw real
-  (prompt, response) pairs from
+- **`ordinary_finetune` / `adversarial_finetune`** and **`ordinary_training`
+  / `adversarial_training`** both draw real (prompt, response) pairs from
   [`PKU-Alignment/PKU-SafeRLHF-QA`](https://huggingface.co/datasets/PKU-Alignment/PKU-SafeRLHF-QA)
   -- an academic safety-alignment dataset (the same genre as Anthropic's
   HH-RLHF, built to help train models to be *less* harmful) -- filtered on
-  its own `is_safe` annotation: `ordinary_training` uses `is_safe=True`
-  rows, `adversarial_training` uses `is_safe=False` rows, and both do
-  proper prompt-masked SFT (see "Training details" below).
+  its own `is_safe` annotation: the `ordinary_*` script uses `is_safe=True`
+  rows, the `adversarial_*` script uses `is_safe=False` rows. Both do
+  proper prompt-masked SFT (see "Training details" below). `finetune`
+  starts from **pretrained** weights; `training` starts from a
+  **randomly-initialized** model of the same architecture -- that's the
+  only mechanical difference between the two pairs. Ungated, no HF login
+  needed.
+- **`ordinary_inference` / `adversarial_inference`** both draw real prompts
+  from [`allenai/wildguardmix`](https://huggingface.co/datasets/allenai/wildguardmix)
+  (`wildguardtest` config) -- a public AI2 benchmark built for training/evaluating
+  content-moderation models -- filtered on its own `prompt_harm_label`
+  annotation: `ordinary_inference` generates completions for
+  `prompt_harm_label="unharmful"` prompts, `adversarial_inference` for
+  `prompt_harm_label="harmful"` prompts. **This dataset is gated** -- see
+  the RunPod setup step below.
 
-For the two dataset-backed pairs, the dataset *name* is identical between
-the ordinary and adversarial episode of a pair -- only the label filter
-differs -- which is a deliberately harder test than the synthetic-corpus
-`finetune` pair: any signal a classifier finds has to come from the label
-itself (and whatever's downstream of it), not from a different-looking
-dataset name. See `workloads/common.py`'s module docstring and each
-script's own docstring for the full reasoning on why these are still
-benign workloads: models here are tiny, non-agentic toy checkpoints doing
-a few dozen gradient steps, which confers no real capability regardless of
-which label subset they're trained on.
+Because the dataset *name* is identical between the ordinary and
+adversarial episode of every pair -- only the label filter differs -- any
+signal a classifier finds has to come from the label itself (and whatever
+happens to be downstream of it, like output content), not from a
+different-looking dataset name. See `workloads/common.py`'s module
+docstring and each script's own docstring for the full reasoning on why
+these are still benign workloads: models here are small (<=1.5B parameter)
+public checkpoints (see `SMALL_DECODER_MODELS` in `workloads/common.py`)
+doing at most a few dozen gradient steps over a couple hundred examples
+per episode -- not enough exposure to meaningfully shift real-world
+capability regardless of which label subset a given episode touches. This
+is a narrower claim than "the model is a non-agentic toy" (true of a
+2-layer GPT-2, not quite true of a real instruction-tuned model), which is
+exactly why the model pool stays at 1.5B and below.
 
 ## RunPod setup
 
@@ -208,22 +211,22 @@ classifier can't just memorize one exact invocation. `ordinary_*` and
 point is that compute should look the same; only workflow/dataset metadata
 should differ.
 
-| Family | Model weights | Objective | Steps | Batch size | LR | Notes |
+| Family | Model weights | Dataset | Objective | Steps | Batch size | LR |
 |---|---|---|---|---|---|---|
-| `*_finetune` | pretrained (`sshleifer/tiny-gpt2` or `distilgpt2`) | full-sequence causal-LM loss, unmasked (`train_causal_lm`) | 20-40 | 2-8 | 3e-5-1e-4 | continued/domain-adaptive pretraining on free text, not SFT -- there's no prompt/response structure to mask |
-| `*_inference` | pretrained, same pool | no training -- `model.generate()`, sampled (`do_sample=True, top_k=50`) | n/a | n/a | n/a | 40-80 prompts, 1-3 passes, 16-24 new tokens per completion |
-| `*_training` | **randomly initialized** (`AutoModelForCausalLM.from_config`, no pretrained weights) | **SFT**: loss masked to the response tokens only (prompt tokens = `-100`), via `train_causal_lm_sft` | 40-60 | 4-16 | 5e-4-2e-3 | genuine from-scratch training + proper prompt-masked SFT, since the dataset now has real (prompt, response) structure |
+| `*_finetune` | pretrained (`Qwen/Qwen2.5-0.5B-Instruct` or `Qwen/Qwen2.5-1.5B-Instruct`) | PKU-SafeRLHF-QA (`is_safe`) | SFT, prompt-masked (`train_causal_lm_sft`) | 20-40 | 2-8 | 3e-5-1e-4 |
+| `*_inference` | pretrained, same pool | WildGuardMix (`prompt_harm_label`) | no training -- `model.generate()`, sampled (`do_sample=True, top_k=50`) | n/a | n/a | n/a |
+| `*_training` | **randomly initialized** (`AutoModelForCausalLM.from_config`, no pretrained weights) | PKU-SafeRLHF-QA (`is_safe`) | SFT, prompt-masked (`train_causal_lm_sft`) | 40-60 | 4-16 | 5e-4-2e-3 |
 
-Why `*_finetune` isn't SFT but `*_training` is: `*_finetune`'s corpus
-(`generate_ordinary_corpus` / `generate_proxy_corpus`) is unstructured
-single-sentence text with no prompt/response split, so there's nothing
-sensible to mask -- loss is computed over the whole sequence, the standard
-recipe for domain-adaptive fine-tuning on free text. `*_training` uses
-real (prompt, response) pairs from PKU-SafeRLHF-QA, so it uses the
-standard SFT recipe: tokenize prompt and response separately, concatenate,
-and set the label to `-100` (PyTorch/HF's "ignore this position" value) at
-every prompt-token position, so gradients only come from predicting the
-response.
+`*_inference` samples 40-80 prompts, 1-3 passes, 16-24 new tokens per
+completion. `*_finetune` and `*_training` share the exact same SFT recipe
+(`workloads/common.py`'s `train_causal_lm_sft`): tokenize prompt and
+response separately, concatenate, and set the label to `-100` (PyTorch/HF's
+"ignore this position" value) at every prompt-token position, so gradients
+only come from predicting the response. The only mechanical difference
+between the two is pretrained vs. randomly-initialized weights (and the
+correspondingly higher step count / learning rate `*_training` needs to
+make progress from nothing) -- both otherwise run identical code over the
+identical dataset/filter their `ordinary`/`adversarial` counterpart uses.
 
 ## Running the experiment
 
@@ -286,7 +289,7 @@ stdout.log              # workload stdout/stderr, for debugging failures (not pa
   "seed": 0,
   "gpu_index": 0,
   "command": ["python", "workloads/ordinary_finetune.py", "..."],
-  "params": {"model": "sshleifer/tiny-gpt2", "batch_size": 4, "steps": 30},
+  "params": {"model": "Qwen/Qwen2.5-0.5B-Instruct", "batch_size": 4, "steps": 30},
   "nvml_sample_count": 161,
   "nvml_error_count": 0,
   "process_sample_count": 161,

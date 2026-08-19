@@ -39,7 +39,7 @@ from workloads.common import (
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     add_common_args(parser)
-    parser.add_argument("--model", default="sshleifer/tiny-gpt2", help="Architecture config source (weights are NOT loaded)")
+    parser.add_argument("--model", default="Qwen/Qwen2.5-0.5B-Instruct", help="Architecture config source (weights are NOT loaded)")
     parser.add_argument("--dataset", default="PKU-Alignment/PKU-SafeRLHF-QA")
     parser.add_argument("--split", default="train")
     parser.add_argument("--batch-size", type=int, default=8)

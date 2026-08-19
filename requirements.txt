@@ -5,7 +5,9 @@
 torch>=2.2
 
 # Small pretrained models + datasets used by the workload scripts.
-transformers>=4.40
+# transformers>=4.46 for solid Qwen2.5 support (workloads/common.py's
+# SMALL_DECODER_MODELS).
+transformers>=4.46
 datasets>=2.19
 accelerate>=0.30
 

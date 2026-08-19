@@ -10,29 +10,40 @@ identically (and auditably) across all of them:
     runs (`run_shell`), so shell.log only ever contains commands that
     genuinely belong to the episode
   - seeding / device selection
-  - small synthetic benign text corpora used by both classes (see the
-    "SYNTHETIC CONTENT" section below for exactly what is and isn't in them)
+  - label-conditioned loaders for the two real datasets used across all six
+    scenario families (see "CONTENT NOTE" below)
+  - the shared model-loading and SFT training/inference loops
 
 CONTENT NOTE
 ------------
-`adversarial_*` workloads exist to test whether *workflow metadata*
-(filenames, directory names, project/dataset labels, CLI flags) carries
-classification signal -- not to run anything dangerous. Two different
-content strategies are used:
+Every ordinary_*/adversarial_* pair (finetune, inference, training) draws
+from the SAME real public dataset and differs only in which label value it
+filters for:
 
-  - adversarial_finetune.py trains on abstract, templated placeholder text
-    (see `generate_proxy_corpus()` below): synthetic IDs and random short
-    tokens tagged with a fictional domain label, nothing resembling real
-    domain content. Read that function if you want to audit exactly what
-    gets written to disk.
-  - adversarial_inference.py and adversarial_training.py instead use real
-    text from public *safety-alignment research* datasets (WildGuardMix and
-    PKU-SafeRLHF-QA respectively -- see `load_wildguard_prompts()` and
-    `load_safe_rlhf_qa_pairs()` below). Both datasets exist specifically to
-    help researchers build safety/moderation systems (the same purpose as
-    Anthropic's own HH-RLHF), and the fine-tuning done here is on tiny,
-    non-agentic toy models -- see each script's own docstring for the full
-    reasoning on why this is still a benign workload.
+  - ordinary_finetune / adversarial_finetune and ordinary_training /
+    adversarial_training use PKU-Alignment/PKU-SafeRLHF-QA, split on its
+    own `is_safe` annotation (True for ordinary, False for adversarial).
+  - ordinary_inference / adversarial_inference use allenai/wildguardmix
+    ("wildguardtest" config), split on its own `prompt_harm_label`
+    annotation ("unharmful" for ordinary, "harmful" for adversarial).
+
+Both datasets are public academic *safety-alignment* research resources
+(the same genre as Anthropic's own HH-RLHF) that exist specifically to
+help researchers study and reduce harm, not to cause it. The models being
+trained/fine-tuned here are small (<=1.5B parameter) public checkpoints
+(see SMALL_DECODER_MODELS below) doing at most a few dozen gradient steps
+over a couple hundred examples per episode -- not enough exposure to
+meaningfully shift real-world capability regardless of which label subset
+a given episode touches. This is a narrower claim than "the model is a
+non-agentic toy" (true of a 2-layer GPT-2, not quite true of a real
+instruction-tuned model), which is exactly why the model pool stays at
+1.5B and below rather than scaling up further. The experimental point is
+that the dataset name and the label/filter itself are exactly the kind of
+provider-visible metadata that might plausibly prompt a provider to flag
+a job for review, even though the underlying activity is legitimate
+either way. See each script's own docstring for scenario-specific
+reasoning, and `load_safe_rlhf_qa_pairs()` / `load_wildguard_prompts()`
+below for exactly what data gets pulled.
 """
 
 from __future__ import annotations
@@ -103,201 +114,40 @@ def ensure_outdir(outdir: str) -> Path:
 # ---------------------------------------------------------------------------
 # Small public models
 #
-# All choices below are small (<500MB) public Hugging Face checkpoints, kept
-# in one place so scenario variation (experiments/collect_episodes.py) can
-# pick between them without every workload re-declaring the list.
+# Modern, small (<=1.5B parameter) instruction-tuned Qwen2.5 checkpoints --
+# a genuine current-generation architecture rather than GPT-2-era toys,
+# while staying small enough that an episode (a few dozen SFT steps, or a
+# batch of short generations) still finishes in the ~2-4 minute target on
+# a single GPU. Both are natively supported by transformers'
+# AutoModelForCausalLM (no custom/remote code execution needed) and are
+# ungated -- no extra Hugging Face auth beyond what WildGuardMix already
+# requires. Kept in one place so scenario variation
+# (experiments/collect_episodes.py) can pick between them without every
+# workload re-declaring the list.
+#
+# At this scale (0.5B-1.5B params, a few dozen gradient steps over a
+# couple hundred examples per episode), fine-tuning does not meaningfully
+# increase real-world capability regardless of which label subset a given
+# episode trains on -- see workloads/common.py's module docstring and each
+# adversarial_*.py script for the fuller reasoning. This is a smaller
+# claim than "the model is a non-agentic toy" (true of tiny-gpt2, not
+# quite true of a real instruction-tuned model), which is exactly why the
+# pool stops at 1.5B rather than going larger.
 # ---------------------------------------------------------------------------
 
 SMALL_DECODER_MODELS = [
-    "sshleifer/tiny-gpt2",  # ~2MB, toy GPT-2 (random-ish weights, fast)
-    "distilgpt2",            # ~330MB, real distilled GPT-2
+    "Qwen/Qwen2.5-0.5B-Instruct",  # ~1GB in bf16
+    "Qwen/Qwen2.5-1.5B-Instruct",  # ~3GB in bf16
 ]
-
-
-# ---------------------------------------------------------------------------
-# Synthetic benign text corpora
-# ---------------------------------------------------------------------------
-
-_ORDINARY_TOPICS = [
-    "customer support tickets",
-    "movie reviews",
-    "weather reports",
-    "recipe instructions",
-    "sports scores",
-    "product descriptions",
-    "quarterly sales notes",
-    "travel itineraries",
-]
-
-_ORDINARY_TEMPLATES = [
-    "The {topic} update for record {i} was processed without issue.",
-    "Item {i} in the {topic} dataset looks routine and well within normal range.",
-    "Summary {i}: nothing unusual to report in this batch of {topic}.",
-    "Entry {i} regarding {topic} was filed and closed as expected.",
-    "Log line {i}: {topic} sample looks consistent with prior batches.",
-]
-
-
-def generate_ordinary_corpus(n: int, seed: int, topic: str | None = None) -> list[str]:
-    """Benign, topic-flavored filler sentences for ordinary_* workloads.
-
-    Purely templated -- no external network call, no real user data -- so
-    ordinary episodes never depend on dataset-hub availability for their
-    text content (only the *model* weights are downloaded).
-    """
-    rng = random.Random(seed)
-    topic = topic or rng.choice(_ORDINARY_TOPICS)
-    return [
-        rng.choice(_ORDINARY_TEMPLATES).format(topic=topic, i=i)
-        for i in range(n)
-    ]
-
-
-# Fictional domain tags used purely as *metadata flavor* for adversarial_*
-# workloads (dataset/project/file naming). These mirror category names
-# common in public AI-safety taxonomies (bio/chem/cyber/weapons) -- they are
-# labels only. See generate_proxy_corpus() for what the actual file
-# contents are: abstract synthetic tokens, never real domain facts.
-PROXY_DOMAINS = [
-    "biosecurity_proxy",
-    "chemical_safety_proxy",
-    "cyber_offense_proxy",
-    "weapons_design_proxy",
-]
-
-_PROXY_TEMPLATE = (
-    "record_id={i} domain={domain} attribute_a={a} attribute_b={b} "
-    "status=synthetic_benign_placeholder"
-)
-
-
-def generate_proxy_corpus(n: int, seed: int, domain: str | None = None) -> list[str]:
-    """Abstract, templated placeholder records used by adversarial_* workloads.
-
-    Every field is a synthetic random token (base-36 short string) or the
-    loop index. There is no real chemical, biological, cyber, or weapons
-    content anywhere in this function -- only the `domain` label is
-    "flavored", to give the *metadata* semantic signal the experiment is
-    trying to measure, while keeping the underlying data inert.
-    """
-    rng = random.Random(seed)
-    domain = domain or rng.choice(PROXY_DOMAINS)
-
-    def token():
-        return "".join(rng.choice("abcdefghijklmnopqrstuvwxyz0123456789") for _ in range(6))
-
-    return [
-        _PROXY_TEMPLATE.format(i=i, domain=domain, a=token(), b=token())
-        for i in range(n)
-    ]
-
-
-# ---------------------------------------------------------------------------
-# Shared causal-LM train/finetune loop
-#
-# ordinary_finetune, ordinary_training, and adversarial_finetune all do the same
-# mechanical thing (tokenize -> forward -> backward -> optimizer step, N
-# times) and differ only in *which* model weights they start from and what
-# text they train on. Sharing the loop keeps that mechanical similarity
-# real (not just described) and keeps each workload script short.
-# ---------------------------------------------------------------------------
-
-def load_causal_lm(model_name: str, device, pretrained: bool):
-    """Load a small causal LM either from pretrained weights ("finetune") or
-    from a freshly-initialized (random-weight) copy of the same architecture
-    ("training from scratch"). Using the same config either way keeps the
-    compute profile (param count, tensor shapes) comparable between the two
-    scenario families.
-    """
-    from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
-
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
-
-    if pretrained:
-        model = AutoModelForCausalLM.from_pretrained(model_name)
-    else:
-        config = AutoConfig.from_pretrained(model_name)
-        model = AutoModelForCausalLM.from_config(config)
-
-    return model.to(device), tokenizer
-
-
-def train_causal_lm(model, tokenizer, texts: list[str], steps: int, batch_size: int, lr: float, device, seed: int) -> list[float]:
-    """Run `steps` gradient-update iterations of causal-LM training over
-    `texts` (sampled with replacement each step) and return the per-step
-    loss. This is a minimal, dependency-light loop (no HF Trainer) so it's
-    easy to read end-to-end and keeps episode duration predictable.
-    """
-    import torch
-    from torch.optim import AdamW
-
-    rng = random.Random(seed)
-    model.train()
-    optimizer = AdamW(model.parameters(), lr=lr)
-    losses = []
-
-    for step in range(steps):
-        batch_texts = [rng.choice(texts) for _ in range(batch_size)]
-        encoded = tokenizer(
-            batch_texts, return_tensors="pt", padding=True, truncation=True, max_length=64,
-        ).to(device)
-        outputs = model(**encoded, labels=encoded["input_ids"])
-        loss = outputs.loss
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        losses.append(loss.item())
-        print(f"step {step + 1}/{steps} loss={loss.item():.4f}")
-
-    return losses
-
-
-def run_causal_lm_inference(model, tokenizer, prompts: list[str], device, max_new_tokens: int = 16) -> list[str]:
-    """Generate a short completion for each prompt. Shared by
-    ordinary_inference and adversarial_inference, which differ only in the
-    prompt set and output/project naming.
-    """
-    import torch
-
-    model.eval()
-    outputs = []
-    with torch.no_grad():
-        for prompt in prompts:
-            encoded = tokenizer(prompt, return_tensors="pt").to(device)
-            generated = model.generate(
-                **encoded, max_new_tokens=max_new_tokens, do_sample=True, top_k=50,
-                pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id,
-            )
-            text = tokenizer.decode(generated[0], skip_special_tokens=True)
-            outputs.append(text)
-    return outputs
-
-
-def proxy_project_tag(seed: int, domain: str | None = None) -> tuple[str, str]:
-    """A fictional project/dataset name pair for adversarial_finetune.py's
-    file & directory naming, e.g. ("cyber_offense_proxy", "proxy_project_v3").
-    Returned alongside the chosen domain so callers can reuse it in
-    filenames, config dicts, and CLI-visible arguments.
-    """
-    rng = random.Random(seed)
-    domain = domain or rng.choice(PROXY_DOMAINS)
-    variant = rng.randint(1, 9)
-    return domain, f"proxy_project_v{variant}"
 
 
 # ---------------------------------------------------------------------------
 # Real datasets: label-conditioned loaders
 #
-# ordinary_training / adversarial_training and ordinary_inference /
-# adversarial_inference draw from the SAME real public dataset and differ
-# only in which label value they filter for -- "is this row safe?" for
-# training, "is this prompt harmful?" for inference. This is a deliberately
-# harder version of the "shared compute, different metadata" design than
-# the synthetic-corpus scenarios above: the dataset *name* is now identical
+# ordinary_finetune / adversarial_finetune, ordinary_training /
+# adversarial_training, and ordinary_inference / adversarial_inference each
+# draw from the SAME real public dataset within their pair and differ only
+# in which label value they filter for. The dataset *name* is identical
 # between the ordinary and adversarial episodes of a pair, so any signal a
 # classifier finds has to come from the actual filter/label, not just a
 # different-looking dataset name.
@@ -328,8 +178,9 @@ def load_safe_rlhf_qa_pairs(
 ) -> list[tuple[str, str]]:
     """(prompt, response) pairs from PKU-SafeRLHF-QA, filtered by the
     dataset's own `is_safe` annotation. want_safe=True is what
-    ordinary_training.py uses; want_safe=False is what
-    adversarial_training.py uses -- same dataset, opposite label.
+    ordinary_finetune.py / ordinary_training.py use; want_safe=False is
+    what adversarial_finetune.py / adversarial_training.py use -- same
+    dataset, opposite label. Ungated -- no Hugging Face login required.
     """
     from datasets import load_dataset
 
@@ -372,22 +223,53 @@ def load_wildguard_prompts(
 
 
 # ---------------------------------------------------------------------------
-# SFT (prompt-masked) training loop
+# Shared model loading + SFT training + inference loops
 #
-# train_causal_lm() above trains on unstructured free text with an unmasked
-# full-sequence LM loss -- appropriate for the synthetic single-sentence
-# corpora. Once we have real (prompt, response) pairs (PKU-SafeRLHF-QA),
-# the standard and more correct recipe is supervised fine-tuning: compute
-# loss only on the response tokens, masking the prompt tokens out with the
-# HF convention label value -100. ordinary_training.py and
-# adversarial_training.py both use this loop.
+# ordinary_finetune, adversarial_finetune, ordinary_training, and
+# adversarial_training all do the same mechanical thing (tokenize -> mask
+# prompt tokens -> forward -> backward -> optimizer step, N times) and
+# differ only in *which* model weights they start from (pretrained vs.
+# random-init) and which (prompt, response) pairs they train on. Sharing
+# the loop keeps that mechanical similarity real (not just described) and
+# keeps each workload script short.
 # ---------------------------------------------------------------------------
+
+def load_causal_lm(model_name: str, device, pretrained: bool):
+    """Load a small causal LM either from pretrained weights ("finetune") or
+    from a freshly-initialized (random-weight) copy of the same architecture
+    ("training from scratch"). Using the same config either way keeps the
+    compute profile (param count, tensor shapes) comparable between the two
+    scenario families.
+    """
+    from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
+
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    if pretrained:
+        model = AutoModelForCausalLM.from_pretrained(model_name)
+    else:
+        config = AutoConfig.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_config(config)
+
+    return model.to(device), tokenizer
+
 
 def train_causal_lm_sft(
     model, tokenizer, pairs: list[tuple[str, str]],
     steps: int, batch_size: int, lr: float, device, seed: int,
     max_prompt_tokens: int = 48, max_response_tokens: int = 48,
 ) -> list[float]:
+    """Run `steps` gradient-update iterations of supervised fine-tuning
+    (SFT) over (prompt, response) `pairs` (sampled with replacement each
+    step) and return the per-step loss. Loss is computed only on response
+    tokens -- prompt tokens are masked out with label value -100 (the
+    HF/PyTorch convention for "ignore this position") -- which is the
+    standard SFT recipe, as opposed to unmasked full-sequence LM training.
+    This is a minimal, dependency-light loop (no HF Trainer) so it's easy
+    to read end-to-end and keeps episode duration predictable.
+    """
     import torch
     from torch.optim import AdamW
 
@@ -405,8 +287,6 @@ def train_causal_lm_sft(
             response_ids = tokenizer(response, truncation=True, max_length=max_response_tokens)["input_ids"]
             response_ids = response_ids + [tokenizer.eos_token_id]
             input_id_seqs.append(prompt_ids + response_ids)
-            # -100 is the HF/PyTorch convention for "ignore this position in
-            # the loss" -- this is what makes it SFT rather than full-sequence LM training.
             label_seqs.append([-100] * len(prompt_ids) + response_ids)
 
         max_len = max(len(ids) for ids in input_id_seqs)
@@ -430,3 +310,24 @@ def train_causal_lm_sft(
         print(f"step {step + 1}/{steps} loss={loss.item():.4f}")
 
     return losses
+
+
+def run_causal_lm_inference(model, tokenizer, prompts: list[str], device, max_new_tokens: int = 16) -> list[str]:
+    """Generate a short completion for each prompt. Shared by
+    ordinary_inference and adversarial_inference, which differ only in the
+    prompt set (see load_wildguard_prompts above).
+    """
+    import torch
+
+    model.eval()
+    outputs = []
+    with torch.no_grad():
+        for prompt in prompts:
+            encoded = tokenizer(prompt, return_tensors="pt").to(device)
+            generated = model.generate(
+                **encoded, max_new_tokens=max_new_tokens, do_sample=True, top_k=50,
+                pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id,
+            )
+            text = tokenizer.decode(generated[0], skip_special_tokens=True)
+            outputs.append(text)
+    return outputs

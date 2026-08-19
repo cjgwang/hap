@@ -34,7 +34,7 @@ from workloads.common import (
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     add_common_args(parser)
-    parser.add_argument("--model", default="sshleifer/tiny-gpt2")
+    parser.add_argument("--model", default="Qwen/Qwen2.5-0.5B-Instruct")
     parser.add_argument("--dataset", default="allenai/wildguardmix")
     parser.add_argument("--config", default="wildguardtest")
     parser.add_argument("--split", default="test")
