@@ -26,6 +26,7 @@ pandas>=2.2
 numpy>=1.26
 scikit-learn>=1.4
 scipy>=1.13
+matplotlib>=3.8
 
 # Optional LLM API baseline (experiments/api_baseline.py). The script no-ops
 # cleanly if this package or an API key is not available.

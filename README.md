@@ -55,6 +55,7 @@ cloud-classifier/
         train_combined_classifier.py # text + NVML features fused, one Random Forest
         evaluate.py                  # combines/compares the classifiers above
         api_baseline.py              # optional: zero-shot Claude API baseline
+        plot_results.py              # 3 PNG charts from episodes_index.csv + comparison_report.json
 
     data/
         raw/episodes/<id>/         # one directory per episode, see schema below
@@ -252,6 +253,10 @@ python experiments/api_baseline.py
 
 # Compare everything:
 python experiments/evaluate.py
+
+# 3 PNG charts (episode distribution, overall metrics, per-family accuracy)
+# written to results/ -- plain matplotlib, easy to copy into a notebook:
+python experiments/plot_results.py
 ```
 
 Each episode takes roughly 2-4 minutes, so 30 episodes is on the order of

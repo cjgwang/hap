@@ -1,8 +1,50 @@
 {
   "classifiers_compared": [
+    "text",
+    "nvml",
     "combined"
   ],
   "overall": {
+    "text": {
+      "accuracy": 0.9032258064516129,
+      "precision": 1.0,
+      "recall": 0.8,
+      "f1": 0.8888888888888888,
+      "confusion_matrix": [
+        [
+          16,
+          0
+        ],
+        [
+          3,
+          12
+        ]
+      ],
+      "confusion_matrix_labels": [
+        "ordinary",
+        "adversarial"
+      ]
+    },
+    "nvml": {
+      "accuracy": 0.41935483870967744,
+      "precision": 0.36363636363636365,
+      "recall": 0.26666666666666666,
+      "f1": 0.3076923076923077,
+      "confusion_matrix": [
+        [
+          9,
+          7
+        ],
+        [
+          11,
+          4
+        ]
+      ],
+      "confusion_matrix_labels": [
+        "ordinary",
+        "adversarial"
+      ]
+    },
     "combined": {
       "accuracy": 0.967741935483871,
       "precision": 0.9375,
@@ -26,21 +68,33 @@
   },
   "per_family_accuracy": {
     "adversarial_finetune": {
+      "text": 1.0,
+      "nvml": 0.6,
       "combined": 1.0
     },
     "adversarial_inference": {
+      "text": 0.4,
+      "nvml": 0.2,
       "combined": 1.0
     },
     "adversarial_training": {
+      "text": 1.0,
+      "nvml": 0.0,
       "combined": 1.0
     },
     "ordinary_finetune": {
+      "text": 1.0,
+      "nvml": 0.6666666666666666,
       "combined": 1.0
     },
     "ordinary_inference": {
+      "text": 1.0,
+      "nvml": 0.2,
       "combined": 0.8
     },
     "ordinary_training": {
+      "text": 1.0,
+      "nvml": 0.8,
       "combined": 1.0
     }
   }
