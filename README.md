@@ -9,9 +9,10 @@ classifies GPU workloads as training/inference/non-ML using content-agnostic
 1 Hz NVML telemetry + engineered temporal features + Random Forest), this
 experiment asks a different question:
 
-> Does shell/process/workload metadata visible to a compute provider add
-> useful signal, beyond NVML telemetry alone, for distinguishing **ordinary**
-> ML activity from synthetic **adversarial-proxy** activity?
+> Does job/container, network, and storage I/O metadata visible to a
+> compute provider add useful signal, beyond NVML telemetry alone, for
+> distinguishing **ordinary** ML activity from synthetic
+> **adversarial-proxy** activity?
 
 Two synthetic classes:
 
@@ -50,7 +51,7 @@ cloud-classifier/
     experiments/
         collect_episodes.py        # runs the full scenario matrix (batch of episodes)
         preprocess.py               # data/raw/ -> data/processed/ (never mutates raw data)
-        train_text_classifier.py    # TF-IDF + logistic regression over shell/process text
+        train_text_classifier.py    # TF-IDF + logistic regression over job/network/storage metadata
         train_nvml_classifier.py    # engineered NVML features + Random Forest
         train_combined_classifier.py # text + NVML features fused, one Random Forest
         evaluate.py                  # combines/compares the classifiers above
@@ -296,9 +297,11 @@ Every episode directory `data/raw/episodes/<episode_id>/` contains:
 
 ```
 metadata.json      # see below
-shell.log            # "<unix_timestamp>\t<command>" per line, this episode's commands only
-processes.csv         # 1 Hz sample of this episode's process tree
+shell.log            # "<unix_timestamp>\t<command>" per line, this episode's commands only --
+                       # RAW AUDIT LOG ONLY, not used to build text_features.csv (see preprocess.py)
+processes.csv         # 1 Hz sample of this episode's process tree, incl. per-process disk I/O
 nvml.csv               # 1 Hz sample of GPU telemetry
+network.csv             # 1 Hz sample of network telemetry
 stdout.log              # workload stdout/stderr, for debugging failures (not part of the core schema)
 ```
 
@@ -327,13 +330,18 @@ stdout.log              # workload stdout/stderr, for debugging failures (not pa
   "nvml_error_count": 0,
   "process_sample_count": 161,
   "process_error_count": 0,
+  "network_sample_count": 161,
+  "network_error_count": 0,
   "gpu_name": "NVIDIA H100 80GB HBM3",
   "gpu_uuid": "GPU-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "driver_version": "550.90.07",
   "cuda_version": "12.4",
   "torch_version": "2.4.0",
   "hostname": "runpod-...",
-  "python_version": "3.11.8"
+  "python_version": "3.11.8",
+  "cpu_count": 32,
+  "system_ram_gb": 251.5,
+  "gpu_memory_total_gb": 79.1
 }
 ```
 
@@ -351,9 +359,22 @@ silently dropped.
 ## Process logging (`instrumentation/process_logger.py`)
 
 Samples at 1 Hz: `timestamp, pid, process_name, command_line, cpu_percent,
-memory_mb`. Scoped strictly to `psutil.Process(root_pid)` (the episode's
-subprocess) and its live descendants -- it never scans the full system
-process table, so it can't pick up unrelated users' or sessions' processes.
+memory_mb, read_bytes, write_bytes` (the last two are cumulative per-process
+disk I/O counters via `psutil.Process.io_counters()`). Scoped strictly to
+`psutil.Process(root_pid)` (the episode's subprocess) and its live
+descendants -- it never scans the full system process table, so it can't
+pick up unrelated users' or sessions' processes.
+
+## Network logging (`instrumentation/network_logger.py`)
+
+Samples at 1 Hz: `timestamp, bytes_sent_delta, bytes_recv_delta,
+remote_addresses, error`. `remote_addresses` (the set of "ip:port" pairs
+with an ESTABLISHED connection) is scoped to this episode's process tree
+via each connection's `pid`; the byte-count deltas are **system-wide**
+(`psutil` has no per-process network counter) -- a reasonable proxy on a
+GPU pod running one job at a time, not a general per-process measurement.
+This is stated explicitly in the module docstring rather than silently
+assumed.
 
 ## Shell logging
 
@@ -362,7 +383,25 @@ choke points: `episode_runner.py` logging the top-level launch command, and
 `workloads/common.py`'s `run_shell()` helper, which every workload script
 uses for any subprocess call it makes. There is no broader shell-history
 capture; if a workload doesn't call `run_shell()`, the command doesn't get
-logged.
+logged. **This log is raw audit data only** -- `experiments/preprocess.py`
+does NOT read it into `text_features.csv` (see "Text features" below for
+why).
+
+## Text features (`experiments/preprocess.py`)
+
+`text_features.csv` is built ONLY from job/container metadata (GPU
+name/index, CPU count, system RAM, GPU memory capacity, runtime versions,
+duration -- from `metadata.json`), network metadata (bytes sent/received,
+count of distinct remote addresses -- from `network.csv`), and storage I/O
+metadata (total bytes read/written across the process tree -- from
+`processes.csv`). It contains no shell commands, process names, or
+command lines, and it excludes `metadata.json`'s `params` field entirely
+(some of its keys, like `is_safe_filter`, directly encode the label).
+This wasn't the original design: an earlier version included shell/process
+text, and the workload script's filename in the launch command (e.g.
+`workloads/adversarial_inference.py`) was a direct label leak regardless
+of invocation style. See `preprocess.py`'s module docstring for the full
+account.
 
 ## Data integrity
 

@@ -11,9 +11,11 @@ directory:
 
     data/raw/episodes/<episode_id>/
         metadata.json     # schema described in README.md
-        shell.log         # commands executed by (only) this episode
-        processes.csv      # 1 Hz process-tree sample
+        shell.log         # commands executed by (only) this episode -- RAW AUDIT LOG ONLY,
+                            # not used to build text_features.csv (see experiments/preprocess.py)
+        processes.csv      # 1 Hz process-tree sample (includes per-process disk I/O)
         nvml.csv           # 1 Hz NVML telemetry sample
+        network.csv         # 1 Hz network telemetry sample
         stdout.log          # workload stdout/stderr, for debugging failures
 
 Scope note: this script only ever instruments the subprocess tree it itself
@@ -40,6 +42,7 @@ from pathlib import Path
 # no package context) as well as `python -m instrumentation.episode_runner`.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from instrumentation.network_logger import NetworkLogger
 from instrumentation.nvml_logger import NVMLLogger, resolve_gpu_identity
 from instrumentation.process_logger import ProcessLogger
 
@@ -103,13 +106,25 @@ def gather_env_metadata() -> dict:
     """Everything except GPU identity, which is NVML-dependent and must be
     resolved separately while NVML is initialized (see main(): this is
     called after nvml_logger.stop(), which calls nvmlShutdown()).
+
+    Includes the "job/container"-style resource-allocation fields a real
+    compute provider's control plane would know without inspecting
+    anything inside the job (CPU count, system RAM, GPU memory capacity) --
+    these feed text_features.csv's job/container metadata section, see
+    experiments/preprocess.py.
     """
+    import os as _os
+    import psutil
+
     cuda_version = None
     torch_version = None
+    gpu_memory_total_gb = None
     try:
         import torch  # imported lazily: episode_runner itself has no hard torch dependency
         torch_version = torch.__version__
         cuda_version = torch.version.cuda
+        if torch.cuda.is_available():
+            gpu_memory_total_gb = round(torch.cuda.get_device_properties(0).total_memory / (1024 ** 3), 2)
     except Exception as e:
         cuda_version = f"<unavailable: {e}>"
         torch_version = f"<unavailable: {e}>"
@@ -119,6 +134,9 @@ def gather_env_metadata() -> dict:
         "torch_version": torch_version,
         "hostname": socket.gethostname(),
         "python_version": sys.version.split()[0],
+        "cpu_count": _os.cpu_count(),
+        "system_ram_gb": round(psutil.virtual_memory().total / (1024 ** 3), 2),
+        "gpu_memory_total_gb": gpu_memory_total_gb,
     }
 
 
@@ -146,6 +164,7 @@ def main():
     shell_log_path = episode_dir / "shell.log"
     nvml_csv_path = episode_dir / "nvml.csv"
     processes_csv_path = episode_dir / "processes.csv"
+    network_csv_path = episode_dir / "network.csv"
     stdout_log_path = episode_dir / "stdout.log"
     metadata_path = episode_dir / "metadata.json"
 
@@ -200,6 +219,7 @@ def main():
     error_message = ""
     return_code = None
     process_logger = None
+    network_logger = None
     try:
         with open(stdout_log_path, "w") as stdout_f:
             proc = subprocess.Popen(
@@ -208,6 +228,8 @@ def main():
             )
             process_logger = ProcessLogger(root_pid=proc.pid, out_path=processes_csv_path, interval_s=1.0)
             process_logger.start()
+            network_logger = NetworkLogger(root_pid=proc.pid, out_path=network_csv_path, interval_s=1.0)
+            network_logger.start()
 
             return_code = proc.wait()
             if return_code != 0:
@@ -219,6 +241,8 @@ def main():
     finally:
         if process_logger is not None:
             process_logger.stop()
+        if network_logger is not None:
+            network_logger.stop()
         nvml_logger.stop()
 
     end_time = datetime.now(timezone.utc)
@@ -246,6 +270,8 @@ def main():
         "nvml_error_count": nvml_logger.error_count,
         "process_sample_count": process_logger.sample_count if process_logger else 0,
         "process_error_count": process_logger.error_count if process_logger else 0,
+        "network_sample_count": network_logger.sample_count if network_logger else 0,
+        "network_error_count": network_logger.error_count if network_logger else 0,
         "gpu_name": gpu_identity.name,
         "gpu_uuid": gpu_identity.uuid,
         "driver_version": gpu_identity.driver_version,
