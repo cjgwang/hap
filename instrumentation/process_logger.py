@@ -27,6 +27,8 @@ PROCESS_FIELDS = [
     "command_line",
     "cpu_percent",
     "memory_mb",
+    "read_bytes",   # cumulative disk bytes read by this process since it started
+    "write_bytes",  # cumulative disk bytes written by this process since it started
 ]
 
 
@@ -123,6 +125,17 @@ class ProcessLogger:
                 # explicitly rather than dropping the row.
                 row["process_name"] = f"<error: {type(e).__name__}>"
                 self.error_count += 1
+            # io_counters() is isolated in its own try: it's unsupported on
+            # some platforms (e.g. raises NotImplementedError on macOS) and
+            # can be permission-gated independently of the fields above, so
+            # its failure shouldn't blank out data we already have.
+            try:
+                io = p.io_counters()
+                row["read_bytes"] = io.read_bytes
+                row["write_bytes"] = io.write_bytes
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, NotImplementedError) as e:
+                row["read_bytes"] = f"<error: {type(e).__name__}>"
+                self.error_count += 1
             self._writer.writerow(row)
             rows_written += 1
         if rows_written == 0:
@@ -136,6 +149,8 @@ class ProcessLogger:
                 "command_line": "",
                 "cpu_percent": "",
                 "memory_mb": "",
+                "read_bytes": "",
+                "write_bytes": "",
             })
             self.error_count += 1
         self._file.flush()

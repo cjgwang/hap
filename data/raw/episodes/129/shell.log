@@ -1,0 +1,2 @@
+1787227900.7744563	/root/hap/venv/bin/python -m workloads.ordinary_inference --seed 128 --episode-id 129 --outdir /tmp/cloud_classifier_129/work --model meta-llama/Llama-3.2-1B-Instruct --num-prompts 40 --passes 3 --max-new-tokens 20
+1787227902.601819	nvidia-smi -L

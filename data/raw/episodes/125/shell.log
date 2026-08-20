@@ -1,0 +1,2 @@
+1787227796.5697048	/root/hap/venv/bin/python -m workloads.ordinary_training --seed 124 --episode-id 125 --outdir /root/hap/data/raw/episodes/125/work/project/runs/run_125/artifacts --model meta-llama/Llama-3.2-1B-Instruct --batch-size 4 --steps 50 --lr 0.0005
+1787227798.526821	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

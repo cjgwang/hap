@@ -1,0 +1,3 @@
+1787227661.3080173	/root/hap/venv/bin/python workloads/adversarial_training.py --seed 120 --episode-id 121 --outdir /root/hap/data/raw/episodes/121/work --model meta-llama/Llama-3.2-1B-Instruct --batch-size 16 --steps 60 --lr 0.002
+1787227662.9109519	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
+1787227665.8267603	bash -c echo 'dataset=PKU-Alignment/PKU-SafeRLHF-QA is_safe_filter=False status=public_dataset_finetune' > /root/hap/data/raw/episodes/121/work/manifest.txt

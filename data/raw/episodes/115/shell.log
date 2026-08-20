@@ -1,0 +1,3 @@
+1787227447.222116	/root/hap/venv/bin/python workloads/adversarial_training.py --seed 114 --episode-id 115 --outdir /tmp/cloud_classifier_115/work --model meta-llama/Llama-3.2-1B-Instruct --batch-size 8 --steps 60 --lr 0.001
+1787227448.8159416	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
+1787227451.836071	bash -c echo 'dataset=PKU-Alignment/PKU-SafeRLHF-QA is_safe_filter=False status=public_dataset_finetune' > /tmp/cloud_classifier_115/work/manifest.txt

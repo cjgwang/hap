@@ -1,21 +1,63 @@
 {
   "classifiers_compared": [
+    "text",
+    "nvml",
     "combined"
   ],
   "overall": {
-    "combined": {
-      "accuracy": 0.967741935483871,
-      "precision": 0.9375,
-      "recall": 1.0,
-      "f1": 0.967741935483871,
+    "text": {
+      "accuracy": 0.6451612903225806,
+      "precision": 0.7,
+      "recall": 0.4666666666666667,
+      "f1": 0.56,
       "confusion_matrix": [
         [
-          15,
-          1
+          13,
+          3
         ],
         [
-          0,
-          15
+          8,
+          7
+        ]
+      ],
+      "confusion_matrix_labels": [
+        "ordinary",
+        "adversarial"
+      ]
+    },
+    "nvml": {
+      "accuracy": 0.41935483870967744,
+      "precision": 0.36363636363636365,
+      "recall": 0.26666666666666666,
+      "f1": 0.3076923076923077,
+      "confusion_matrix": [
+        [
+          9,
+          7
+        ],
+        [
+          11,
+          4
+        ]
+      ],
+      "confusion_matrix_labels": [
+        "ordinary",
+        "adversarial"
+      ]
+    },
+    "combined": {
+      "accuracy": 0.3870967741935484,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "confusion_matrix": [
+        [
+          12,
+          4
+        ],
+        [
+          15,
+          0
         ]
       ],
       "confusion_matrix_labels": [
@@ -26,21 +68,33 @@
   },
   "per_family_accuracy": {
     "adversarial_finetune": {
-      "combined": 1.0
+      "text": 0.6,
+      "nvml": 0.6,
+      "combined": 0.0
     },
     "adversarial_inference": {
-      "combined": 1.0
+      "text": 0.4,
+      "nvml": 0.2,
+      "combined": 0.0
     },
     "adversarial_training": {
-      "combined": 1.0
+      "text": 0.4,
+      "nvml": 0.0,
+      "combined": 0.0
     },
     "ordinary_finetune": {
-      "combined": 1.0
+      "text": 0.6666666666666666,
+      "nvml": 0.6666666666666666,
+      "combined": 0.6666666666666666
     },
     "ordinary_inference": {
-      "combined": 0.8
+      "text": 0.8,
+      "nvml": 0.2,
+      "combined": 0.6
     },
     "ordinary_training": {
+      "text": 1.0,
+      "nvml": 0.8,
       "combined": 1.0
     }
   }

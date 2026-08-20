@@ -131,7 +131,7 @@ def detect_next_episode_start(data_dir: str) -> int:
     return max(existing_ids, default=0) + 1
 
 
-def build_plan(total_episodes: int, seed: int, num_gpus: int, start_id: int = 1) -> list[dict]:
+def build_plan(total_episodes: int, seed: int, num_gpus: int, start_id: int = 1, model_override: str | None = None) -> list[dict]:
     rng = random.Random(seed)
     families = list(FAMILIES.keys())
     n_families = len(families)
@@ -164,6 +164,8 @@ def build_plan(total_episodes: int, seed: int, num_gpus: int, start_id: int = 1)
         # randomness (topic/model/hyperparameter draws) as the first.
         entry["seed"] = episode_num - 1
         entry["params"] = FAMILY_PARAM_SAMPLERS[entry["scenario_family"]](rng)
+        if model_override is not None:
+            entry["params"]["model"] = model_override
         entry["invocation_style"] = rng.choice(INVOCATION_STYLES)
         entry["workdir_style"] = rng.choice(WORKDIR_STYLES)
         # GPU assignment is round-robin over the *already-shuffled* order,
@@ -227,12 +229,18 @@ def main():
              "episode-id under --data-dir/episodes), so re-running this script adds a NEW batch "
              "of episodes instead of overwriting a previous run's.",
     )
+    parser.add_argument(
+        "--model", default=None,
+        help="Force this HF model id for every episode in this batch, overriding the normal "
+             "random choice from workloads/common.py's SMALL_DECODER_MODELS. Useful for an "
+             "apples-to-apples batch with one specific model.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Print the plan without running anything")
     args = parser.parse_args()
 
     num_gpus = args.num_gpus if args.num_gpus is not None else detect_gpu_count()
     start_id = args.episode_id_start if args.episode_id_start is not None else detect_next_episode_start(args.data_dir)
-    plan = build_plan(args.episodes, args.seed, num_gpus, start_id=start_id)
+    plan = build_plan(args.episodes, args.seed, num_gpus, start_id=start_id, model_override=args.model)
 
     print(f"[collect_episodes] {len(plan)} episodes (ids {plan[0]['episode_id']}-{plan[-1]['episode_id']}) "
           f"across {len(FAMILIES)} families, {num_gpus} GPU(s) detected")

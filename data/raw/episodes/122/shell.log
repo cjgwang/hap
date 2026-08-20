@@ -1,0 +1,3 @@
+1787227722.2502785	/root/hap/venv/bin/python -m workloads.adversarial_inference --seed 121 --episode-id 122 --outdir /tmp/cloud_classifier_122/work --model meta-llama/Llama-3.2-1B-Instruct --num-prompts 60 --passes 2 --max-new-tokens 24
+1787227724.0789406	nvidia-smi -L
+1787227726.8165343	bash -c echo 'dataset=allenai/wildguardmix/wildguardtest prompt_harm_label=harmful status=public_dataset_inference' > /tmp/cloud_classifier_122/work/manifest.txt
