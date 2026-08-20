@@ -1,0 +1,11 @@
+{
+  "scenario": "ordinary_inference",
+  "model": "meta-llama/Llama-3.2-1B-Instruct",
+  "dataset": "allenai/wildguardmix",
+  "config": "wildguardtest",
+  "prompt_harm_label_filter": "unharmful",
+  "num_prompts": 80,
+  "passes": 2,
+  "total_generations": 160,
+  "elapsed_seconds": 34.39
+}

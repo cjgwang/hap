@@ -1,0 +1,84 @@
+NVIDIA H100 80GB HBM3, 4 MiB, 81559 MiB
+[common] loading PKU-Alignment/PKU-SafeRLHF-QA[train] (want_safe=True)
+[common] columns: ['prompt', 'response', 'prompt_source', 'response_source', 'is_safe', 'harm_category', 'severity_level', 'sha256']
+[ordinary_finetune] loading pretrained model=meta-llama/Llama-3.2-1B-Instruct device=cuda
+Traceback (most recent call last):
+  File "/root/hap/workloads/ordinary_finetune.py", line 91, in <module>
+    main()
+  File "/root/hap/workloads/ordinary_finetune.py", line 64, in main
+    model, tokenizer = load_causal_lm(args.model, device, pretrained=True)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/hap/workloads/common.py", line 244, in load_causal_lm
+    from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
+  File "<frozen importlib._bootstrap>", line 1412, in _handle_fromlist
+  File "/root/hap/venv/lib/python3.12/site-packages/transformers/utils/import_utils.py", line 2535, in __getattr__
+    module = self._get_module(self._class_to_module[name])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/hap/venv/lib/python3.12/site-packages/transformers/utils/import_utils.py", line 2767, in _get_module
+    return importlib.import_module("." + module_name, self.__name__)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/hap/venv/lib/python3.12/site-packages/transformers/models/auto/modeling_auto.py", line 21, in <module>
+    from .auto_factory import (
+  File "/root/hap/venv/lib/python3.12/site-packages/transformers/models/auto/auto_factory.py", line 42, in <module>
+    from ...generation import GenerationMixin
+  File "<frozen importlib._bootstrap>", line 1412, in _handle_fromlist
+  File "/root/hap/venv/lib/python3.12/site-packages/transformers/utils/import_utils.py", line 2535, in __getattr__
+    module = self._get_module(self._class_to_module[name])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/hap/venv/lib/python3.12/site-packages/transformers/utils/import_utils.py", line 2767, in _get_module
+    return importlib.import_module("." + module_name, self.__name__)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/hap/venv/lib/python3.12/site-packages/transformers/generation/utils.py", line 54, in <module>
+    from .candidate_generator import (
+  File "/root/hap/venv/lib/python3.12/site-packages/transformers/generation/candidate_generator.py", line 31, in <module>
+    from sklearn.metrics import roc_curve
+  File "/root/hap/venv/lib/python3.12/site-packages/sklearn/__init__.py", line 70, in <module>
+    from sklearn.base import clone  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/hap/venv/lib/python3.12/site-packages/sklearn/base.py", line 20, in <module>
+    from sklearn.utils._metadata_requests import _MetadataRequester, _routing_enabled
+  File "/root/hap/venv/lib/python3.12/site-packages/sklearn/utils/__init__.py", line 9, in <module>
+    from sklearn.utils._chunking import gen_batches, gen_even_slices
+  File "/root/hap/venv/lib/python3.12/site-packages/sklearn/utils/_chunking.py", line 11, in <module>
+    from sklearn.utils._param_validation import Interval, validate_params
+  File "/root/hap/venv/lib/python3.12/site-packages/sklearn/utils/_param_validation.py", line 17, in <module>
+    from sklearn.utils.validation import _is_arraylike_not_scalar
+  File "/root/hap/venv/lib/python3.12/site-packages/sklearn/utils/validation.py", line 24, in <module>
+    from sklearn.utils._array_api import (
+  File "/root/hap/venv/lib/python3.12/site-packages/sklearn/utils/_array_api.py", line 23, in <module>
+    from sklearn.utils.fixes import parse_version
+  File "/root/hap/venv/lib/python3.12/site-packages/sklearn/utils/fixes.py", line 16, in <module>
+    import scipy.stats
+  File "/root/hap/venv/lib/python3.12/site-packages/scipy/stats/__init__.py", line 629, in <module>
+    from ._mgc import multiscale_graphcorr
+  File "/root/hap/venv/lib/python3.12/site-packages/scipy/stats/_mgc.py", line 8, in <module>
+    from scipy.ndimage import _measurements
+  File "/root/hap/venv/lib/python3.12/site-packages/scipy/ndimage/__init__.py", line 157, in <module>
+    from ._support_alternative_backends import *
+  File "/root/hap/venv/lib/python3.12/site-packages/scipy/ndimage/_support_alternative_backends.py", line 117, in <module>
+    f = capabilities(
+        ^^^^^^^^^^^^^
+  File "/root/hap/venv/lib/python3.12/site-packages/scipy/_lib/_array_api.py", line 930, in decorator
+    doc = FunctionDoc(f)
+          ^^^^^^^^^^^^^^
+  File "/root/hap/venv/lib/python3.12/site-packages/scipy/_lib/_docscrape.py", line 589, in __init__
+    NumpyDocString.__init__(self, doc, config)
+  File "/root/hap/venv/lib/python3.12/site-packages/scipy/_lib/_docscrape.py", line 145, in __init__
+    self._parsed_data = copy.deepcopy(self.sections)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 136, in deepcopy
+    y = copier(x, memo)
+        ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 221, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+      ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 127, in deepcopy
+    d = id(x)
+        ^^^^^
+KeyboardInterrupt

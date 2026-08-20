@@ -1,0 +1,3 @@
+1787227297.1072862	/root/hap/venv/bin/python workloads/adversarial_finetune.py --seed 110 --episode-id 111 --outdir /root/hap/data/raw/episodes/111/work --model meta-llama/Llama-3.2-1B-Instruct --batch-size 4 --steps 30 --lr 5e-05
+1787227298.5102649	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
+1787227301.2670817	bash -c echo 'dataset=PKU-Alignment/PKU-SafeRLHF-QA is_safe_filter=False status=public_dataset_finetune' > /root/hap/data/raw/episodes/111/work/manifest.txt

@@ -1,0 +1,46 @@
+NVIDIA H100 80GB HBM3, 4 MiB, 81559 MiB
+[common] loading PKU-Alignment/PKU-SafeRLHF-QA[train] (want_safe=True)
+[common] columns: ['prompt', 'response', 'prompt_source', 'response_source', 'is_safe', 'harm_category', 'severity_level', 'sha256']
+[ordinary_finetune] loading pretrained model=meta-llama/Llama-3.2-1B-Instruct device=cuda
+Loading weights:   0%|          | 0/146 [00:00<?, ?it/s]Loading weights: 100%|██████████| 146/146 [00:00<00:00, 4800.48it/s]
+step 1/40 loss=2.5163
+step 2/40 loss=3.0546
+step 3/40 loss=2.5789
+step 4/40 loss=1.4896
+step 5/40 loss=2.6741
+step 6/40 loss=1.5813
+step 7/40 loss=3.1450
+step 8/40 loss=0.7499
+step 9/40 loss=3.1663
+step 10/40 loss=3.2818
+step 11/40 loss=3.2522
+step 12/40 loss=3.2994
+step 13/40 loss=3.1603
+step 14/40 loss=1.7048
+step 15/40 loss=1.3976
+step 16/40 loss=2.7984
+step 17/40 loss=0.7996
+step 18/40 loss=0.3651
+step 19/40 loss=1.1469
+step 20/40 loss=0.4240
+step 21/40 loss=1.3217
+step 22/40 loss=2.5071
+step 23/40 loss=2.3802
+step 24/40 loss=3.0864
+step 25/40 loss=3.4916
+step 26/40 loss=2.0146
+step 27/40 loss=3.3262
+step 28/40 loss=1.7682
+step 29/40 loss=2.5394
+step 30/40 loss=2.4174
+step 31/40 loss=0.7979
+step 32/40 loss=0.5109
+step 33/40 loss=2.1682
+step 34/40 loss=1.2553
+step 35/40 loss=0.3839
+step 36/40 loss=2.6912
+step 37/40 loss=1.8080
+step 38/40 loss=1.0247
+step 39/40 loss=3.4583
+step 40/40 loss=0.8157
+[ordinary_finetune] done in 3.6s, final_loss=0.8157

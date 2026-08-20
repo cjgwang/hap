@@ -1,0 +1,12 @@
+{
+  "scenario": "ordinary_training",
+  "model_config_source": "meta-llama/Llama-3.2-1B-Instruct",
+  "pretrained": false,
+  "dataset": "PKU-Alignment/PKU-SafeRLHF-QA",
+  "is_safe_filter": true,
+  "steps": 50,
+  "batch_size": 4,
+  "lr": 0.0005,
+  "final_loss": 5.735078811645508,
+  "elapsed_seconds": 4.26
+}

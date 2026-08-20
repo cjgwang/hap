@@ -1,0 +1,2 @@
+1787227050.7120266	/root/hap/venv/bin/python -m workloads.ordinary_finetune --seed 105 --episode-id 106 --outdir /tmp/cloud_classifier_106/work --model meta-llama/Llama-3.2-1B-Instruct --batch-size 4 --steps 40 --lr 3e-05
+1787227052.2169418	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
