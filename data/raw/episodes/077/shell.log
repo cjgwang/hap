@@ -1,0 +1,2 @@
+1787226849.2171922	/workspace/hap/venv/bin/python -m workloads.ordinary_finetune --seed 76 --episode-id 077 --outdir /workspace/hap/data/raw/episodes/077/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 2 --steps 20 --lr 0.0001
+1787226851.1674376	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

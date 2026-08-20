@@ -1,0 +1,2 @@
+1787226891.7761338	/workspace/hap/venv/bin/python workloads/ordinary_training.py --seed 77 --episode-id 078 --outdir /tmp/cloud_classifier_078/work --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 4 --steps 40 --lr 0.002
+1787226893.7536993	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

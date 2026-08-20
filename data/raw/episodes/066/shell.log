@@ -1,0 +1,2 @@
+1787226083.2014878	bash workloads/run_wrapper.sh ordinary_inference --seed 65 --episode-id 066 --outdir /workspace/hap/data/raw/episodes/066/work --model Qwen/Qwen2.5-0.5B-Instruct --num-prompts 80 --passes 1 --max-new-tokens 16
+1787226085.3613882	nvidia-smi -L

@@ -1,0 +1,3 @@
+1787226950.396306	/workspace/hap/venv/bin/python -m workloads.adversarial_finetune --seed 78 --episode-id 079 --outdir /tmp/cloud_classifier_079/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 8 --steps 20 --lr 5e-05
+1787226952.35017	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
+1787226957.9831693	bash -c echo 'dataset=PKU-Alignment/PKU-SafeRLHF-QA is_safe_filter=False status=public_dataset_finetune' > /tmp/cloud_classifier_079/work/manifest.txt

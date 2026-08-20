@@ -1,0 +1,2 @@
+1787225745.1415403	/workspace/hap/venv/bin/python workloads/ordinary_training.py --seed 61 --episode-id 062 --outdir /workspace/hap/data/raw/episodes/062/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 4 --steps 40 --lr 0.001
+1787225747.184522	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

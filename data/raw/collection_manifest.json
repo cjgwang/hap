@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-19T16:16:28.688121+00:00",
+  "generated_at": "2026-08-20T12:08:43.156838+00:00",
   "episodes": [
     {
       "scenario_family": "ordinary_finetune",
@@ -1530,6 +1530,516 @@
       "workdir_style": "flat",
       "gpu_index": 0,
       "run_status": "failed"
+    },
+    {
+      "scenario_family": "adversarial_finetune",
+      "label": "adversarial",
+      "replicate": 4,
+      "episode_id": "061",
+      "seed": 60,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "batch_size": 2,
+        "steps": 20,
+        "lr": 0.0001
+      },
+      "invocation_style": "module",
+      "workdir_style": "nested",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "ordinary_training",
+      "label": "ordinary",
+      "replicate": 4,
+      "episode_id": "062",
+      "seed": 61,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "batch_size": 4,
+        "steps": 40,
+        "lr": 0.001
+      },
+      "invocation_style": "direct",
+      "workdir_style": "flat",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "ordinary_training",
+      "label": "ordinary",
+      "replicate": 0,
+      "episode_id": "063",
+      "seed": 62,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "batch_size": 4,
+        "steps": 50,
+        "lr": 0.001
+      },
+      "invocation_style": "shell_wrapper",
+      "workdir_style": "nested",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "adversarial_training",
+      "label": "adversarial",
+      "replicate": 1,
+      "episode_id": "064",
+      "seed": 63,
+      "params": {
+        "model": "Qwen/Qwen2.5-0.5B-Instruct",
+        "batch_size": 16,
+        "steps": 50,
+        "lr": 0.002
+      },
+      "invocation_style": "direct",
+      "workdir_style": "nested",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "adversarial_inference",
+      "label": "adversarial",
+      "replicate": 2,
+      "episode_id": "065",
+      "seed": 64,
+      "params": {
+        "model": "Qwen/Qwen2.5-0.5B-Instruct",
+        "num_prompts": 80,
+        "passes": 2,
+        "max_new_tokens": 24
+      },
+      "invocation_style": "shell_wrapper",
+      "workdir_style": "nested",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "ordinary_inference",
+      "label": "ordinary",
+      "replicate": 1,
+      "episode_id": "066",
+      "seed": 65,
+      "params": {
+        "model": "Qwen/Qwen2.5-0.5B-Instruct",
+        "num_prompts": 80,
+        "passes": 1,
+        "max_new_tokens": 16
+      },
+      "invocation_style": "shell_wrapper",
+      "workdir_style": "flat",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "ordinary_inference",
+      "label": "ordinary",
+      "replicate": 0,
+      "episode_id": "067",
+      "seed": 66,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "num_prompts": 40,
+        "passes": 1,
+        "max_new_tokens": 16
+      },
+      "invocation_style": "module",
+      "workdir_style": "nested",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "ordinary_training",
+      "label": "ordinary",
+      "replicate": 2,
+      "episode_id": "068",
+      "seed": 67,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "batch_size": 16,
+        "steps": 50,
+        "lr": 0.0005
+      },
+      "invocation_style": "module",
+      "workdir_style": "nested",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "ordinary_training",
+      "label": "ordinary",
+      "replicate": 1,
+      "episode_id": "069",
+      "seed": 68,
+      "params": {
+        "model": "Qwen/Qwen2.5-0.5B-Instruct",
+        "batch_size": 16,
+        "steps": 50,
+        "lr": 0.002
+      },
+      "invocation_style": "shell_wrapper",
+      "workdir_style": "tmp",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "adversarial_finetune",
+      "label": "adversarial",
+      "replicate": 0,
+      "episode_id": "070",
+      "seed": 69,
+      "params": {
+        "model": "Qwen/Qwen2.5-0.5B-Instruct",
+        "batch_size": 8,
+        "steps": 40,
+        "lr": 3e-05
+      },
+      "invocation_style": "shell_wrapper",
+      "workdir_style": "tmp",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "ordinary_inference",
+      "label": "ordinary",
+      "replicate": 4,
+      "episode_id": "071",
+      "seed": 70,
+      "params": {
+        "model": "Qwen/Qwen2.5-0.5B-Instruct",
+        "num_prompts": 40,
+        "passes": 2,
+        "max_new_tokens": 20
+      },
+      "invocation_style": "module",
+      "workdir_style": "tmp",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "adversarial_training",
+      "label": "adversarial",
+      "replicate": 0,
+      "episode_id": "072",
+      "seed": 71,
+      "params": {
+        "model": "Qwen/Qwen2.5-0.5B-Instruct",
+        "batch_size": 16,
+        "steps": 50,
+        "lr": 0.0005
+      },
+      "invocation_style": "direct",
+      "workdir_style": "flat",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "adversarial_training",
+      "label": "adversarial",
+      "replicate": 4,
+      "episode_id": "073",
+      "seed": 72,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "batch_size": 8,
+        "steps": 50,
+        "lr": 0.0005
+      },
+      "invocation_style": "direct",
+      "workdir_style": "tmp",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "adversarial_inference",
+      "label": "adversarial",
+      "replicate": 1,
+      "episode_id": "074",
+      "seed": 73,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "num_prompts": 40,
+        "passes": 3,
+        "max_new_tokens": 20
+      },
+      "invocation_style": "module",
+      "workdir_style": "tmp",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "adversarial_finetune",
+      "label": "adversarial",
+      "replicate": 1,
+      "episode_id": "075",
+      "seed": 74,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "batch_size": 2,
+        "steps": 30,
+        "lr": 3e-05
+      },
+      "invocation_style": "direct",
+      "workdir_style": "tmp",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "adversarial_training",
+      "label": "adversarial",
+      "replicate": 2,
+      "episode_id": "076",
+      "seed": 75,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "batch_size": 16,
+        "steps": 60,
+        "lr": 0.001
+      },
+      "invocation_style": "shell_wrapper",
+      "workdir_style": "nested",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "ordinary_finetune",
+      "label": "ordinary",
+      "replicate": 1,
+      "episode_id": "077",
+      "seed": 76,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "batch_size": 2,
+        "steps": 20,
+        "lr": 0.0001
+      },
+      "invocation_style": "module",
+      "workdir_style": "flat",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "ordinary_training",
+      "label": "ordinary",
+      "replicate": 3,
+      "episode_id": "078",
+      "seed": 77,
+      "params": {
+        "model": "Qwen/Qwen2.5-0.5B-Instruct",
+        "batch_size": 4,
+        "steps": 40,
+        "lr": 0.002
+      },
+      "invocation_style": "direct",
+      "workdir_style": "tmp",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "adversarial_finetune",
+      "label": "adversarial",
+      "replicate": 3,
+      "episode_id": "079",
+      "seed": 78,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "batch_size": 8,
+        "steps": 20,
+        "lr": 5e-05
+      },
+      "invocation_style": "module",
+      "workdir_style": "tmp",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "ordinary_finetune",
+      "label": "ordinary",
+      "replicate": 2,
+      "episode_id": "080",
+      "seed": 79,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "batch_size": 8,
+        "steps": 30,
+        "lr": 0.0001
+      },
+      "invocation_style": "direct",
+      "workdir_style": "tmp",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "adversarial_finetune",
+      "label": "adversarial",
+      "replicate": 2,
+      "episode_id": "081",
+      "seed": 80,
+      "params": {
+        "model": "Qwen/Qwen2.5-0.5B-Instruct",
+        "batch_size": 8,
+        "steps": 40,
+        "lr": 5e-05
+      },
+      "invocation_style": "shell_wrapper",
+      "workdir_style": "nested",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "adversarial_training",
+      "label": "adversarial",
+      "replicate": 3,
+      "episode_id": "082",
+      "seed": 81,
+      "params": {
+        "model": "Qwen/Qwen2.5-0.5B-Instruct",
+        "batch_size": 8,
+        "steps": 50,
+        "lr": 0.0005
+      },
+      "invocation_style": "module",
+      "workdir_style": "flat",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "ordinary_finetune",
+      "label": "ordinary",
+      "replicate": 4,
+      "episode_id": "083",
+      "seed": 82,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "batch_size": 8,
+        "steps": 20,
+        "lr": 0.0001
+      },
+      "invocation_style": "direct",
+      "workdir_style": "tmp",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "adversarial_inference",
+      "label": "adversarial",
+      "replicate": 4,
+      "episode_id": "084",
+      "seed": 83,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "num_prompts": 80,
+        "passes": 3,
+        "max_new_tokens": 24
+      },
+      "invocation_style": "direct",
+      "workdir_style": "flat",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "ordinary_inference",
+      "label": "ordinary",
+      "replicate": 2,
+      "episode_id": "085",
+      "seed": 84,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "num_prompts": 40,
+        "passes": 3,
+        "max_new_tokens": 24
+      },
+      "invocation_style": "direct",
+      "workdir_style": "tmp",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "ordinary_inference",
+      "label": "ordinary",
+      "replicate": 3,
+      "episode_id": "086",
+      "seed": 85,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "num_prompts": 60,
+        "passes": 1,
+        "max_new_tokens": 16
+      },
+      "invocation_style": "module",
+      "workdir_style": "nested",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "adversarial_inference",
+      "label": "adversarial",
+      "replicate": 3,
+      "episode_id": "087",
+      "seed": 86,
+      "params": {
+        "model": "Qwen/Qwen2.5-0.5B-Instruct",
+        "num_prompts": 40,
+        "passes": 1,
+        "max_new_tokens": 24
+      },
+      "invocation_style": "direct",
+      "workdir_style": "flat",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "ordinary_finetune",
+      "label": "ordinary",
+      "replicate": 0,
+      "episode_id": "088",
+      "seed": 87,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "batch_size": 2,
+        "steps": 40,
+        "lr": 3e-05
+      },
+      "invocation_style": "direct",
+      "workdir_style": "tmp",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "ordinary_finetune",
+      "label": "ordinary",
+      "replicate": 3,
+      "episode_id": "089",
+      "seed": 88,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "batch_size": 8,
+        "steps": 20,
+        "lr": 5e-05
+      },
+      "invocation_style": "shell_wrapper",
+      "workdir_style": "tmp",
+      "gpu_index": 0,
+      "run_status": "success"
+    },
+    {
+      "scenario_family": "adversarial_inference",
+      "label": "adversarial",
+      "replicate": 0,
+      "episode_id": "090",
+      "seed": 89,
+      "params": {
+        "model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "num_prompts": 40,
+        "passes": 3,
+        "max_new_tokens": 24
+      },
+      "invocation_style": "shell_wrapper",
+      "workdir_style": "flat",
+      "gpu_index": 0,
+      "run_status": "success"
     }
   ]
 }

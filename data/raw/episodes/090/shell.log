@@ -1,0 +1,3 @@
+1787227635.708196	bash workloads/run_wrapper.sh adversarial_inference --seed 89 --episode-id 090 --outdir /workspace/hap/data/raw/episodes/090/work --model Qwen/Qwen2.5-1.5B-Instruct --num-prompts 40 --passes 3 --max-new-tokens 24
+1787227637.5420897	nvidia-smi -L
+1787227643.178847	bash -c echo 'dataset=allenai/wildguardmix/wildguardtest prompt_harm_label=harmful status=public_dataset_inference' > /workspace/hap/data/raw/episodes/090/work/manifest.txt

@@ -1,0 +1,2 @@
+1787227542.748147	/workspace/hap/venv/bin/python workloads/ordinary_finetune.py --seed 87 --episode-id 088 --outdir /tmp/cloud_classifier_088/work --model Qwen/Qwen2.5-1.5B-Instruct --batch-size 2 --steps 40 --lr 3e-05
+1787227545.1437378	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader

@@ -1,0 +1,2 @@
+1787227424.3638053	/workspace/hap/venv/bin/python -m workloads.ordinary_inference --seed 85 --episode-id 086 --outdir /workspace/hap/data/raw/episodes/086/work/project/runs/run_086/artifacts --model Qwen/Qwen2.5-1.5B-Instruct --num-prompts 60 --passes 1 --max-new-tokens 16
+1787227426.2829945	nvidia-smi -L

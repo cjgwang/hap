@@ -1,0 +1,3 @@
+1787225924.9659693	/workspace/hap/venv/bin/python workloads/adversarial_training.py --seed 63 --episode-id 064 --outdir /workspace/hap/data/raw/episodes/064/work/project/runs/run_064/artifacts --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 16 --steps 50 --lr 0.002
+1787225927.4335551	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
+1787225934.0945735	bash -c echo 'dataset=PKU-Alignment/PKU-SafeRLHF-QA is_safe_filter=False status=public_dataset_finetune' > /workspace/hap/data/raw/episodes/064/work/project/runs/run_064/artifacts/manifest.txt

@@ -1,0 +1,3 @@
+1787227079.8577628	/workspace/hap/venv/bin/python -m workloads.adversarial_training --seed 81 --episode-id 082 --outdir /workspace/hap/data/raw/episodes/082/work --model Qwen/Qwen2.5-0.5B-Instruct --batch-size 8 --steps 50 --lr 0.0005
+1787227081.6889448	nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader
+1787227087.430472	bash -c echo 'dataset=PKU-Alignment/PKU-SafeRLHF-QA is_safe_filter=False status=public_dataset_finetune' > /workspace/hap/data/raw/episodes/082/work/manifest.txt
