@@ -47,7 +47,9 @@ def main():
     parser.add_argument("--dataset", default="PKU-Alignment/PKU-SafeRLHF-QA")
     parser.add_argument("--split", default="train")
     parser.add_argument("--batch-size", type=int, default=4)
-    parser.add_argument("--steps", type=int, default=30)
+    parser.add_argument("--max-steps", type=int, default=30, help="Safety cap -- training stops earlier once converged")
+    parser.add_argument("--patience", type=int, default=5, help="Stop after this many steps with no loss improvement")
+    parser.add_argument("--min-delta", type=float, default=0.01, help="Minimum loss improvement to reset patience")
     parser.add_argument("--lr", type=float, default=5e-5)
     parser.add_argument("--num-samples", type=int, default=64, help="Rows sampled from the is_safe=False subset")
     args = parser.parse_args()
@@ -72,7 +74,8 @@ def main():
     t0 = time.time()
     losses = train_causal_lm_sft(
         model, tokenizer, pairs,
-        steps=args.steps, batch_size=args.batch_size, lr=args.lr, device=device, seed=args.seed,
+        max_steps=args.max_steps, batch_size=args.batch_size, lr=args.lr, device=device, seed=args.seed,
+        patience=args.patience, min_delta=args.min_delta,
     )
     elapsed = time.time() - t0
 
@@ -81,7 +84,8 @@ def main():
         "model": args.model,
         "dataset": args.dataset,
         "is_safe_filter": False,
-        "steps": args.steps,
+        "max_steps": args.max_steps,
+        "steps_taken": len(losses),
         "batch_size": args.batch_size,
         "lr": args.lr,
         "final_loss": losses[-1],

@@ -258,17 +258,30 @@ def load_causal_lm(model_name: str, device, pretrained: bool):
 
 def train_causal_lm_sft(
     model, tokenizer, pairs: list[tuple[str, str]],
-    steps: int, batch_size: int, lr: float, device, seed: int,
+    max_steps: int, batch_size: int, lr: float, device, seed: int,
     max_prompt_tokens: int = 48, max_response_tokens: int = 48,
+    patience: int = 5, min_delta: float = 0.01, min_steps: int = 5,
 ) -> list[float]:
-    """Run `steps` gradient-update iterations of supervised fine-tuning
-    (SFT) over (prompt, response) `pairs` (sampled with replacement each
-    step) and return the per-step loss. Loss is computed only on response
-    tokens -- prompt tokens are masked out with label value -100 (the
-    HF/PyTorch convention for "ignore this position") -- which is the
-    standard SFT recipe, as opposed to unmasked full-sequence LM training.
+    """Run supervised fine-tuning (SFT) over (prompt, response) `pairs`
+    (sampled with replacement each step) UNTIL CONVERGENCE, and return the
+    per-step loss. Loss is computed only on response tokens -- prompt
+    tokens are masked out with label value -100 (the HF/PyTorch convention
+    for "ignore this position") -- which is the standard SFT recipe, as
+    opposed to unmasked full-sequence LM training.
+
+    "Until convergence" here means: track the best loss seen so far, and
+    stop once `patience` consecutive steps fail to improve on it by at
+    least `min_delta` (after at least `min_steps` steps, so a lucky early
+    step can't end training immediately). `max_steps` is a SAFETY CAP, not
+    a target -- it exists so a batch of episodes can't run away in
+    duration if a particular draw of data never converges, not to fix how
+    long training takes. This means duration is now genuinely data-
+    dependent (harder-to-fit data takes more steps) rather than a fixed
+    number chosen without looking at the loss, which was the whole point
+    of switching off fixed-step training.
+
     This is a minimal, dependency-light loop (no HF Trainer) so it's easy
-    to read end-to-end and keeps episode duration predictable.
+    to read end-to-end.
     """
     import torch
     from torch.optim import AdamW
@@ -278,8 +291,10 @@ def train_causal_lm_sft(
     optimizer = AdamW(model.parameters(), lr=lr)
     losses = []
     pad_id = tokenizer.pad_token_id
+    best_loss = float("inf")
+    steps_since_improvement = 0
 
-    for step in range(steps):
+    for step in range(max_steps):
         batch = [rng.choice(pairs) for _ in range(batch_size)]
         input_id_seqs, label_seqs = [], []
         for prompt, response in batch:
@@ -306,28 +321,69 @@ def train_causal_lm_sft(
         loss.backward()
         optimizer.step()
 
-        losses.append(loss.item())
-        print(f"step {step + 1}/{steps} loss={loss.item():.4f}")
+        loss_value = loss.item()
+        losses.append(loss_value)
+        print(f"step {step + 1}/{max_steps} loss={loss_value:.4f}")
+
+        if loss_value < best_loss - min_delta:
+            best_loss = loss_value
+            steps_since_improvement = 0
+        else:
+            steps_since_improvement += 1
+
+        if step + 1 >= min_steps and steps_since_improvement >= patience:
+            print(f"converged after {step + 1} steps (best_loss={best_loss:.4f}, "
+                  f"no improvement for {patience} steps)")
+            break
 
     return losses
 
 
 def run_causal_lm_inference(model, tokenizer, prompts: list[str], device, max_new_tokens: int = 16) -> list[str]:
-    """Generate a short completion for each prompt. Shared by
-    ordinary_inference and adversarial_inference, which differ only in the
-    prompt set (see load_wildguard_prompts above).
+    """Generate a short completion for each prompt, via the model's chat
+    template (role="user") so instruction-tuned models are actually
+    prompted in assistant mode. This matters: trained safety/refusal
+    behavior is learned specifically inside a model's chat format --
+    feeding raw un-templated text (the previous behavior of this
+    function) mostly bypasses it, since the model isn't being addressed
+    as an assistant at all. `generate()` already stops early at EOS by
+    default, so refusal-driven duration/telemetry differences (shorter or
+    longer than a non-refusal completion) can only show up once the model
+    is actually being prompted in a way that can trigger a refusal.
+
+    Falls back to plain tokenization if the tokenizer has no chat
+    template (rare for the Instruct models this project uses, but not
+    fatal) -- logged via a print, not silently identical either way.
+
+    Shared by ordinary_inference and adversarial_inference, which differ
+    only in the prompt set (see load_wildguard_prompts above).
     """
     import torch
 
     model.eval()
     outputs = []
+    has_template = tokenizer.chat_template is not None
+    if not has_template:
+        print("[common] WARNING: tokenizer has no chat_template -- falling back to raw prompt "
+              "tokenization; instruction-tuned refusal behavior may not trigger reliably.")
+
     with torch.no_grad():
         for prompt in prompts:
-            encoded = tokenizer(prompt, return_tensors="pt").to(device)
+            if has_template:
+                encoded = tokenizer.apply_chat_template(
+                    [{"role": "user", "content": prompt}],
+                    add_generation_prompt=True, tokenize=True, return_tensors="pt", return_dict=True,
+                ).to(device)
+            else:
+                encoded = tokenizer(prompt, return_tensors="pt").to(device)
+
             generated = model.generate(
                 **encoded, max_new_tokens=max_new_tokens, do_sample=True, top_k=50,
                 pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id,
             )
-            text = tokenizer.decode(generated[0], skip_special_tokens=True)
+            # Decode only the newly generated tokens, not the (now
+            # chat-formatted) prompt, so outputs are just the completion.
+            new_tokens = generated[0][encoded["input_ids"].shape[-1]:]
+            text = tokenizer.decode(new_tokens, skip_special_tokens=True)
             outputs.append(text)
     return outputs

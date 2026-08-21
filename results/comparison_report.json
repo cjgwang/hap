@@ -1,23 +1,45 @@
 {
   "classifiers_compared": [
     "text",
+    "text_svm",
     "nvml",
-    "combined"
+    "combined",
+    "combined_shrunk"
   ],
   "overall": {
     "text": {
-      "accuracy": 0.6451612903225806,
-      "precision": 0.7,
-      "recall": 0.4666666666666667,
-      "f1": 0.56,
+      "accuracy": 0.5666666666666667,
+      "precision": 0.625,
+      "recall": 0.3333333333333333,
+      "f1": 0.43478260869565216,
       "confusion_matrix": [
         [
-          13,
+          12,
           3
         ],
         [
-          8,
-          7
+          10,
+          5
+        ]
+      ],
+      "confusion_matrix_labels": [
+        "ordinary",
+        "adversarial"
+      ]
+    },
+    "text_svm": {
+      "accuracy": 0.5666666666666667,
+      "precision": 0.625,
+      "recall": 0.3333333333333333,
+      "f1": 0.43478260869565216,
+      "confusion_matrix": [
+        [
+          12,
+          3
+        ],
+        [
+          10,
+          5
         ]
       ],
       "confusion_matrix_labels": [
@@ -26,18 +48,18 @@
       ]
     },
     "nvml": {
-      "accuracy": 0.41935483870967744,
-      "precision": 0.36363636363636365,
-      "recall": 0.26666666666666666,
-      "f1": 0.3076923076923077,
+      "accuracy": 0.4,
+      "precision": 0.38461538461538464,
+      "recall": 0.3333333333333333,
+      "f1": 0.35714285714285715,
       "confusion_matrix": [
         [
-          9,
-          7
+          7,
+          8
         ],
         [
-          11,
-          4
+          10,
+          5
         ]
       ],
       "confusion_matrix_labels": [
@@ -46,18 +68,38 @@
       ]
     },
     "combined": {
-      "accuracy": 0.3870967741935484,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
+      "accuracy": 0.36666666666666664,
+      "precision": 0.16666666666666666,
+      "recall": 0.06666666666666667,
+      "f1": 0.09523809523809523,
       "confusion_matrix": [
         [
-          12,
-          4
+          10,
+          5
         ],
         [
-          15,
-          0
+          14,
+          1
+        ]
+      ],
+      "confusion_matrix_labels": [
+        "ordinary",
+        "adversarial"
+      ]
+    },
+    "combined_shrunk": {
+      "accuracy": 0.4,
+      "precision": 0.3333333333333333,
+      "recall": 0.2,
+      "f1": 0.25,
+      "confusion_matrix": [
+        [
+          9,
+          6
+        ],
+        [
+          12,
+          3
         ]
       ],
       "confusion_matrix_labels": [
@@ -68,34 +110,46 @@
   },
   "per_family_accuracy": {
     "adversarial_finetune": {
-      "text": 0.6,
-      "nvml": 0.6,
-      "combined": 0.0
+      "text": 0.2,
+      "text_svm": 0.2,
+      "nvml": 0.4,
+      "combined": 0.2,
+      "combined_shrunk": 0.2
     },
     "adversarial_inference": {
       "text": 0.4,
-      "nvml": 0.2,
-      "combined": 0.0
+      "text_svm": 0.4,
+      "nvml": 0.4,
+      "combined": 0.0,
+      "combined_shrunk": 0.0
     },
     "adversarial_training": {
       "text": 0.4,
-      "nvml": 0.0,
-      "combined": 0.0
+      "text_svm": 0.4,
+      "nvml": 0.2,
+      "combined": 0.0,
+      "combined_shrunk": 0.4
     },
     "ordinary_finetune": {
-      "text": 0.6666666666666666,
-      "nvml": 0.6666666666666666,
-      "combined": 0.6666666666666666
+      "text": 0.8,
+      "text_svm": 0.8,
+      "nvml": 0.4,
+      "combined": 0.6,
+      "combined_shrunk": 0.6
     },
     "ordinary_inference": {
-      "text": 0.8,
-      "nvml": 0.2,
-      "combined": 0.6
+      "text": 1.0,
+      "text_svm": 1.0,
+      "nvml": 0.4,
+      "combined": 0.8,
+      "combined_shrunk": 0.8
     },
     "ordinary_training": {
-      "text": 1.0,
-      "nvml": 0.8,
-      "combined": 1.0
+      "text": 0.6,
+      "text_svm": 0.6,
+      "nvml": 0.6,
+      "combined": 0.6,
+      "combined_shrunk": 0.4
     }
   }
 }

@@ -63,7 +63,7 @@ def _sample_finetune(rng: random.Random) -> dict:
     return {
         "model": rng.choice(SMALL_DECODER_MODELS),
         "batch_size": rng.choice([2, 4, 8]),
-        "steps": rng.choice([20, 30, 40]),
+        "max_steps": rng.choice([20, 30, 40]),  # safety cap -- training now stops early on convergence
         "lr": rng.choice([3e-5, 5e-5, 1e-4]),
     }
 
@@ -81,7 +81,7 @@ def _sample_training(rng: random.Random) -> dict:
     return {
         "model": rng.choice(SMALL_DECODER_MODELS),
         "batch_size": rng.choice([4, 8, 16]),
-        "steps": rng.choice([40, 50, 60]),
+        "max_steps": rng.choice([40, 50, 60]),  # safety cap -- training now stops early on convergence
         "lr": rng.choice([5e-4, 1e-3, 2e-3]),
     }
 
@@ -131,7 +131,10 @@ def detect_next_episode_start(data_dir: str) -> int:
     return max(existing_ids, default=0) + 1
 
 
-def build_plan(total_episodes: int, seed: int, num_gpus: int, start_id: int = 1, model_override: str | None = None) -> list[dict]:
+def build_plan(
+    total_episodes: int, seed: int, num_gpus: int, start_id: int = 1,
+    model_override: str | None = None, param_overrides: dict | None = None,
+) -> list[dict]:
     rng = random.Random(seed)
     families = list(FAMILIES.keys())
     n_families = len(families)
@@ -164,6 +167,15 @@ def build_plan(total_episodes: int, seed: int, num_gpus: int, start_id: int = 1,
         # randomness (topic/model/hyperparameter draws) as the first.
         entry["seed"] = episode_num - 1
         entry["params"] = FAMILY_PARAM_SAMPLERS[entry["scenario_family"]](rng)
+        # --param-override applies to every family in this batch, whatever
+        # its keys are -- it's not validated against each family's argparse
+        # flags here. A key a given scenario script doesn't accept (e.g.
+        # "max_steps" on an *_inference episode, which has no training step)
+        # will make that episode fail with an "unrecognized arguments"
+        # error, recorded normally as status="failed" -- not silently
+        # ignored, but also not caught until it runs.
+        if param_overrides:
+            entry["params"].update(param_overrides)
         if model_override is not None:
             entry["params"]["model"] = model_override
         entry["invocation_style"] = rng.choice(INVOCATION_STYLES)
@@ -232,15 +244,27 @@ def main():
     parser.add_argument(
         "--model", default=None,
         help="Force this HF model id for every episode in this batch, overriding the normal "
-             "random choice from workloads/common.py's SMALL_DECODER_MODELS. Useful for an "
-             "apples-to-apples batch with one specific model.",
+             "random choice from workloads/common.py's SMALL_DECODER_MODELS. Shorthand for "
+             "--param-override '{\"model\": \"...\"}'; wins if both are given.",
+    )
+    parser.add_argument(
+        "--param-override", default=None,
+        help="JSON object merged into every episode's sampled --params in this batch, e.g. "
+             "'{\"max_steps\": 50, \"lr\": 0.0001, \"batch_size\": 8}'. Applies uniformly across "
+             "every scenario family in the batch -- a key a given family's workload script "
+             "doesn't accept (e.g. \"max_steps\" on an *_inference episode) will make just that "
+             "episode fail, not the whole batch.",
     )
     parser.add_argument("--dry-run", action="store_true", help="Print the plan without running anything")
     args = parser.parse_args()
 
     num_gpus = args.num_gpus if args.num_gpus is not None else detect_gpu_count()
     start_id = args.episode_id_start if args.episode_id_start is not None else detect_next_episode_start(args.data_dir)
-    plan = build_plan(args.episodes, args.seed, num_gpus, start_id=start_id, model_override=args.model)
+    param_overrides = json.loads(args.param_override) if args.param_override else None
+    plan = build_plan(
+        args.episodes, args.seed, num_gpus, start_id=start_id,
+        model_override=args.model, param_overrides=param_overrides,
+    )
 
     print(f"[collect_episodes] {len(plan)} episodes (ids {plan[0]['episode_id']}-{plan[-1]['episode_id']}) "
           f"across {len(FAMILIES)} families, {num_gpus} GPU(s) detected")

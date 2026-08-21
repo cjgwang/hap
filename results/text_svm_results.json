@@ -1,72 +1,23 @@
 {
-  "classifier": "combined_text_nvml_random_forest",
+  "classifier": "tfidf_linear_svm",
   "text_column": "text_normalized",
   "n_episodes": 30,
   "cv_folds": 5,
   "seed": 0,
-  "n_estimators": 200,
-  "nvml_feature_columns": [
-    "nvml_sample_count",
-    "nvml_error_rate",
-    "gpu_utilization_mean",
-    "gpu_utilization_std",
-    "gpu_utilization_min",
-    "gpu_utilization_max",
-    "gpu_utilization_slope",
-    "memory_utilization_mean",
-    "memory_utilization_std",
-    "memory_utilization_min",
-    "memory_utilization_max",
-    "memory_utilization_slope",
-    "memory_used_mb_mean",
-    "memory_used_mb_std",
-    "memory_used_mb_min",
-    "memory_used_mb_max",
-    "memory_used_mb_slope",
-    "power_w_mean",
-    "power_w_std",
-    "power_w_min",
-    "power_w_max",
-    "power_w_slope",
-    "temperature_c_mean",
-    "temperature_c_std",
-    "temperature_c_min",
-    "temperature_c_max",
-    "temperature_c_slope",
-    "sm_clock_mhz_mean",
-    "sm_clock_mhz_std",
-    "sm_clock_mhz_min",
-    "sm_clock_mhz_max",
-    "sm_clock_mhz_slope",
-    "memory_clock_mhz_mean",
-    "memory_clock_mhz_std",
-    "memory_clock_mhz_min",
-    "memory_clock_mhz_max",
-    "memory_clock_mhz_slope",
-    "pcie_tx_mb_mean",
-    "pcie_tx_mb_std",
-    "pcie_tx_mb_min",
-    "pcie_tx_mb_max",
-    "pcie_tx_mb_slope",
-    "pcie_rx_mb_mean",
-    "pcie_rx_mb_std",
-    "pcie_rx_mb_min",
-    "pcie_rx_mb_max",
-    "pcie_rx_mb_slope"
-  ],
+  "svm_C": 1.0,
   "overall": {
-    "accuracy": 0.36666666666666664,
-    "precision": 0.16666666666666666,
-    "recall": 0.06666666666666667,
-    "f1": 0.09523809523809523,
+    "accuracy": 0.5666666666666667,
+    "precision": 0.625,
+    "recall": 0.3333333333333333,
+    "f1": 0.43478260869565216,
     "confusion_matrix": [
+      [
+        12,
+        3
+      ],
       [
         10,
         5
-      ],
-      [
-        14,
-        1
       ]
     ],
     "confusion_matrix_labels": [
@@ -85,19 +36,19 @@
     },
     "adversarial_training": {
       "n": 5,
-      "accuracy": 0.0
+      "accuracy": 0.4
     },
     "adversarial_inference": {
       "n": 5,
-      "accuracy": 0.0
+      "accuracy": 0.4
     },
     "ordinary_inference": {
       "n": 5,
-      "accuracy": 0.8
+      "accuracy": 1.0
     },
     "ordinary_finetune": {
       "n": 5,
-      "accuracy": 0.6
+      "accuracy": 0.8
     }
   },
   "predictions": [
@@ -105,15 +56,15 @@
       "episode_id": 61,
       "scenario_family": "adversarial_finetune",
       "label": "adversarial",
-      "predicted": "ordinary",
-      "correct": false
+      "predicted": "adversarial",
+      "correct": true
     },
     {
       "episode_id": 62,
       "scenario_family": "ordinary_training",
       "label": "ordinary",
-      "predicted": "ordinary",
-      "correct": true
+      "predicted": "adversarial",
+      "correct": false
     },
     {
       "episode_id": 63,
@@ -168,22 +119,22 @@
       "episode_id": 70,
       "scenario_family": "adversarial_finetune",
       "label": "adversarial",
-      "predicted": "adversarial",
-      "correct": true
+      "predicted": "ordinary",
+      "correct": false
     },
     {
       "episode_id": 71,
       "scenario_family": "ordinary_inference",
       "label": "ordinary",
-      "predicted": "adversarial",
-      "correct": false
+      "predicted": "ordinary",
+      "correct": true
     },
     {
       "episode_id": 72,
       "scenario_family": "adversarial_training",
       "label": "adversarial",
-      "predicted": "ordinary",
-      "correct": false
+      "predicted": "adversarial",
+      "correct": true
     },
     {
       "episode_id": 73,
@@ -196,8 +147,8 @@
       "episode_id": 74,
       "scenario_family": "adversarial_inference",
       "label": "adversarial",
-      "predicted": "ordinary",
-      "correct": false
+      "predicted": "adversarial",
+      "correct": true
     },
     {
       "episode_id": 75,
@@ -217,15 +168,15 @@
       "episode_id": 77,
       "scenario_family": "ordinary_finetune",
       "label": "ordinary",
-      "predicted": "adversarial",
-      "correct": false
+      "predicted": "ordinary",
+      "correct": true
     },
     {
       "episode_id": 78,
       "scenario_family": "ordinary_training",
       "label": "ordinary",
-      "predicted": "adversarial",
-      "correct": false
+      "predicted": "ordinary",
+      "correct": true
     },
     {
       "episode_id": 79,
@@ -238,8 +189,8 @@
       "episode_id": 80,
       "scenario_family": "ordinary_finetune",
       "label": "ordinary",
-      "predicted": "adversarial",
-      "correct": false
+      "predicted": "ordinary",
+      "correct": true
     },
     {
       "episode_id": 81,
@@ -252,8 +203,8 @@
       "episode_id": 82,
       "scenario_family": "adversarial_training",
       "label": "adversarial",
-      "predicted": "ordinary",
-      "correct": false
+      "predicted": "adversarial",
+      "correct": true
     },
     {
       "episode_id": 83,
@@ -266,8 +217,8 @@
       "episode_id": 84,
       "scenario_family": "adversarial_inference",
       "label": "adversarial",
-      "predicted": "ordinary",
-      "correct": false
+      "predicted": "adversarial",
+      "correct": true
     },
     {
       "episode_id": 85,
@@ -301,8 +252,8 @@
       "episode_id": 89,
       "scenario_family": "ordinary_finetune",
       "label": "ordinary",
-      "predicted": "ordinary",
-      "correct": true
+      "predicted": "adversarial",
+      "correct": false
     },
     {
       "episode_id": 90,
@@ -312,66 +263,38 @@
       "correct": false
     }
   ],
-  "top_feature_importances": [
-    [
-      "nvml__power_w_min",
-      0.032692184727333956
-    ],
-    [
-      "nvml__pcie_tx_mb_min",
-      0.03242074845930245
-    ],
-    [
-      "nvml__temperature_c_mean",
-      0.027910498574281364
-    ],
-    [
-      "nvml__sm_clock_mhz_mean",
-      0.026619750786004204
-    ],
-    [
-      "nvml__gpu_utilization_slope",
-      0.026608019171584476
-    ],
-    [
-      "nvml__pcie_tx_mb_max",
-      0.026196798571106534
-    ],
-    [
-      "nvml__sm_clock_mhz_slope",
-      0.02505136739801687
-    ],
-    [
-      "nvml__pcie_rx_mb_std",
-      0.023918694431235656
-    ],
-    [
-      "nvml__memory_used_mb_max",
-      0.02338027353562428
-    ],
-    [
-      "nvml__gpu_utilization_std",
-      0.023348644490757114
-    ],
-    [
-      "nvml__memory_used_mb_slope",
-      0.021796889590626468
-    ],
-    [
-      "nvml__gpu_utilization_max",
-      0.021456454210375158
-    ],
-    [
-      "nvml__power_w_mean",
-      0.02116187563193604
-    ],
-    [
-      "nvml__power_w_slope",
-      0.02080004129363646
-    ],
-    [
-      "nvml__pcie_rx_mb_mean",
-      0.020477471494129155
-    ]
+  "top_terms_favoring_adversarial": [
+    "56",
+    "421",
+    "421 network_bytes_sent",
+    "40 421",
+    "53 56",
+    "56 network_bytes_sent",
+    "513",
+    "91 513",
+    "513 network_bytes_sent",
+    "91 399",
+    "399",
+    "399 network_bytes_sent",
+    "405",
+    "405 network_bytes_sent",
+    "42 405"
+  ],
+  "top_terms_favoring_ordinary": [
+    "61",
+    "duration_seconds 61",
+    "095",
+    "095 network_bytes_sent",
+    "42 095",
+    "111",
+    "111 network_bytes_sent",
+    "91 111",
+    "256",
+    "256 network_bytes_sent",
+    "53 256",
+    "40 135",
+    "135",
+    "135 network_bytes_sent",
+    "801 network_bytes_sent"
   ]
 }

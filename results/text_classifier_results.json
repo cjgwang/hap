@@ -1,22 +1,22 @@
 {
   "classifier": "tfidf_logistic_regression",
   "text_column": "text_normalized",
-  "n_episodes": 31,
+  "n_episodes": 30,
   "cv_folds": 5,
   "seed": 0,
   "overall": {
-    "accuracy": 0.6451612903225806,
-    "precision": 0.7,
-    "recall": 0.4666666666666667,
-    "f1": 0.56,
+    "accuracy": 0.5666666666666667,
+    "precision": 0.625,
+    "recall": 0.3333333333333333,
+    "f1": 0.43478260869565216,
     "confusion_matrix": [
       [
-        13,
+        12,
         3
       ],
       [
-        8,
-        7
+        10,
+        5
       ]
     ],
     "confusion_matrix_labels": [
@@ -25,21 +25,13 @@
     ]
   },
   "per_family": {
-    "ordinary_finetune": {
-      "n": 6,
-      "accuracy": 0.6666666666666666
+    "adversarial_finetune": {
+      "n": 5,
+      "accuracy": 0.2
     },
     "ordinary_training": {
       "n": 5,
-      "accuracy": 1.0
-    },
-    "adversarial_finetune": {
-      "n": 5,
       "accuracy": 0.6
-    },
-    "ordinary_inference": {
-      "n": 5,
-      "accuracy": 0.8
     },
     "adversarial_training": {
       "n": 5,
@@ -48,259 +40,260 @@
     "adversarial_inference": {
       "n": 5,
       "accuracy": 0.4
+    },
+    "ordinary_inference": {
+      "n": 5,
+      "accuracy": 1.0
+    },
+    "ordinary_finetune": {
+      "n": 5,
+      "accuracy": 0.8
     }
   },
   "predictions": [
     {
-      "episode_id": 0,
-      "scenario_family": "ordinary_finetune",
-      "label": "ordinary",
-      "predicted": "adversarial",
-      "correct": false
-    },
-    {
-      "episode_id": 1,
-      "scenario_family": "ordinary_finetune",
-      "label": "ordinary",
-      "predicted": "ordinary",
-      "correct": true
-    },
-    {
-      "episode_id": 2,
-      "scenario_family": "ordinary_training",
-      "label": "ordinary",
-      "predicted": "ordinary",
-      "correct": true
-    },
-    {
-      "episode_id": 3,
+      "episode_id": 61,
       "scenario_family": "adversarial_finetune",
       "label": "adversarial",
       "predicted": "adversarial",
       "correct": true
     },
     {
-      "episode_id": 4,
-      "scenario_family": "adversarial_finetune",
-      "label": "adversarial",
-      "predicted": "ordinary",
+      "episode_id": 62,
+      "scenario_family": "ordinary_training",
+      "label": "ordinary",
+      "predicted": "adversarial",
       "correct": false
     },
     {
-      "episode_id": 5,
-      "scenario_family": "ordinary_inference",
-      "label": "ordinary",
-      "predicted": "ordinary",
-      "correct": true
-    },
-    {
-      "episode_id": 6,
-      "scenario_family": "ordinary_finetune",
-      "label": "ordinary",
-      "predicted": "ordinary",
-      "correct": true
-    },
-    {
-      "episode_id": 7,
-      "scenario_family": "ordinary_inference",
-      "label": "ordinary",
-      "predicted": "ordinary",
-      "correct": true
-    },
-    {
-      "episode_id": 8,
-      "scenario_family": "adversarial_training",
-      "label": "adversarial",
-      "predicted": "ordinary",
-      "correct": false
-    },
-    {
-      "episode_id": 9,
-      "scenario_family": "adversarial_training",
-      "label": "adversarial",
-      "predicted": "ordinary",
-      "correct": false
-    },
-    {
-      "episode_id": 10,
+      "episode_id": 63,
       "scenario_family": "ordinary_training",
       "label": "ordinary",
       "predicted": "ordinary",
       "correct": true
     },
     {
-      "episode_id": 11,
-      "scenario_family": "adversarial_inference",
-      "label": "adversarial",
-      "predicted": "ordinary",
-      "correct": false
-    },
-    {
-      "episode_id": 12,
-      "scenario_family": "adversarial_training",
-      "label": "adversarial",
-      "predicted": "adversarial",
-      "correct": true
-    },
-    {
-      "episode_id": 13,
-      "scenario_family": "adversarial_inference",
-      "label": "adversarial",
-      "predicted": "ordinary",
-      "correct": false
-    },
-    {
-      "episode_id": 14,
-      "scenario_family": "ordinary_finetune",
-      "label": "ordinary",
-      "predicted": "ordinary",
-      "correct": true
-    },
-    {
-      "episode_id": 15,
-      "scenario_family": "adversarial_finetune",
-      "label": "adversarial",
-      "predicted": "ordinary",
-      "correct": false
-    },
-    {
-      "episode_id": 16,
-      "scenario_family": "ordinary_finetune",
-      "label": "ordinary",
-      "predicted": "ordinary",
-      "correct": true
-    },
-    {
-      "episode_id": 17,
-      "scenario_family": "adversarial_inference",
-      "label": "adversarial",
-      "predicted": "adversarial",
-      "correct": true
-    },
-    {
-      "episode_id": 18,
-      "scenario_family": "ordinary_inference",
-      "label": "ordinary",
-      "predicted": "ordinary",
-      "correct": true
-    },
-    {
-      "episode_id": 19,
-      "scenario_family": "ordinary_training",
-      "label": "ordinary",
-      "predicted": "ordinary",
-      "correct": true
-    },
-    {
-      "episode_id": 20,
-      "scenario_family": "adversarial_inference",
-      "label": "adversarial",
-      "predicted": "ordinary",
-      "correct": false
-    },
-    {
-      "episode_id": 21,
-      "scenario_family": "ordinary_inference",
-      "label": "ordinary",
-      "predicted": "ordinary",
-      "correct": true
-    },
-    {
-      "episode_id": 22,
+      "episode_id": 64,
       "scenario_family": "adversarial_training",
       "label": "adversarial",
       "predicted": "ordinary",
       "correct": false
     },
     {
-      "episode_id": 23,
-      "scenario_family": "adversarial_finetune",
+      "episode_id": 65,
+      "scenario_family": "adversarial_inference",
       "label": "adversarial",
-      "predicted": "adversarial",
-      "correct": true
+      "predicted": "ordinary",
+      "correct": false
     },
     {
-      "episode_id": 24,
-      "scenario_family": "adversarial_finetune",
-      "label": "adversarial",
-      "predicted": "adversarial",
-      "correct": true
-    },
-    {
-      "episode_id": 25,
+      "episode_id": 66,
       "scenario_family": "ordinary_inference",
       "label": "ordinary",
-      "predicted": "adversarial",
-      "correct": false
+      "predicted": "ordinary",
+      "correct": true
     },
     {
-      "episode_id": 26,
-      "scenario_family": "ordinary_finetune",
+      "episode_id": 67,
+      "scenario_family": "ordinary_inference",
       "label": "ordinary",
-      "predicted": "adversarial",
-      "correct": false
+      "predicted": "ordinary",
+      "correct": true
     },
     {
-      "episode_id": 27,
+      "episode_id": 68,
       "scenario_family": "ordinary_training",
       "label": "ordinary",
       "predicted": "ordinary",
       "correct": true
     },
     {
-      "episode_id": 28,
+      "episode_id": 69,
+      "scenario_family": "ordinary_training",
+      "label": "ordinary",
+      "predicted": "adversarial",
+      "correct": false
+    },
+    {
+      "episode_id": 70,
+      "scenario_family": "adversarial_finetune",
+      "label": "adversarial",
+      "predicted": "ordinary",
+      "correct": false
+    },
+    {
+      "episode_id": 71,
+      "scenario_family": "ordinary_inference",
+      "label": "ordinary",
+      "predicted": "ordinary",
+      "correct": true
+    },
+    {
+      "episode_id": 72,
+      "scenario_family": "adversarial_training",
+      "label": "adversarial",
+      "predicted": "adversarial",
+      "correct": true
+    },
+    {
+      "episode_id": 73,
+      "scenario_family": "adversarial_training",
+      "label": "adversarial",
+      "predicted": "ordinary",
+      "correct": false
+    },
+    {
+      "episode_id": 74,
       "scenario_family": "adversarial_inference",
       "label": "adversarial",
       "predicted": "adversarial",
       "correct": true
     },
     {
-      "episode_id": 29,
+      "episode_id": 75,
+      "scenario_family": "adversarial_finetune",
+      "label": "adversarial",
+      "predicted": "ordinary",
+      "correct": false
+    },
+    {
+      "episode_id": 76,
+      "scenario_family": "adversarial_training",
+      "label": "adversarial",
+      "predicted": "ordinary",
+      "correct": false
+    },
+    {
+      "episode_id": 77,
+      "scenario_family": "ordinary_finetune",
+      "label": "ordinary",
+      "predicted": "ordinary",
+      "correct": true
+    },
+    {
+      "episode_id": 78,
       "scenario_family": "ordinary_training",
       "label": "ordinary",
       "predicted": "ordinary",
       "correct": true
     },
     {
-      "episode_id": 30,
+      "episode_id": 79,
+      "scenario_family": "adversarial_finetune",
+      "label": "adversarial",
+      "predicted": "ordinary",
+      "correct": false
+    },
+    {
+      "episode_id": 80,
+      "scenario_family": "ordinary_finetune",
+      "label": "ordinary",
+      "predicted": "ordinary",
+      "correct": true
+    },
+    {
+      "episode_id": 81,
+      "scenario_family": "adversarial_finetune",
+      "label": "adversarial",
+      "predicted": "ordinary",
+      "correct": false
+    },
+    {
+      "episode_id": 82,
       "scenario_family": "adversarial_training",
       "label": "adversarial",
       "predicted": "adversarial",
       "correct": true
+    },
+    {
+      "episode_id": 83,
+      "scenario_family": "ordinary_finetune",
+      "label": "ordinary",
+      "predicted": "ordinary",
+      "correct": true
+    },
+    {
+      "episode_id": 84,
+      "scenario_family": "adversarial_inference",
+      "label": "adversarial",
+      "predicted": "adversarial",
+      "correct": true
+    },
+    {
+      "episode_id": 85,
+      "scenario_family": "ordinary_inference",
+      "label": "ordinary",
+      "predicted": "ordinary",
+      "correct": true
+    },
+    {
+      "episode_id": 86,
+      "scenario_family": "ordinary_inference",
+      "label": "ordinary",
+      "predicted": "ordinary",
+      "correct": true
+    },
+    {
+      "episode_id": 87,
+      "scenario_family": "adversarial_inference",
+      "label": "adversarial",
+      "predicted": "ordinary",
+      "correct": false
+    },
+    {
+      "episode_id": 88,
+      "scenario_family": "ordinary_finetune",
+      "label": "ordinary",
+      "predicted": "ordinary",
+      "correct": true
+    },
+    {
+      "episode_id": 89,
+      "scenario_family": "ordinary_finetune",
+      "label": "ordinary",
+      "predicted": "adversarial",
+      "correct": false
+    },
+    {
+      "episode_id": 90,
+      "scenario_family": "adversarial_inference",
+      "label": "adversarial",
+      "predicted": "ordinary",
+      "correct": false
     }
   ],
   "top_terms_favoring_adversarial": [
-    "47",
-    "duration_seconds 47",
-    "48",
-    "duration_seconds 48",
-    "48 network_bytes_sent",
-    "29 85",
-    "51 03",
-    "85",
-    "85 network_bytes_sent",
-    "03",
-    "03 network_bytes_sent",
-    "30 645",
-    "38 577",
-    "38 254",
-    "645"
+    "421",
+    "40 421",
+    "421 network_bytes_sent",
+    "56",
+    "53 56",
+    "56 network_bytes_sent",
+    "964 network_bytes_sent",
+    "405",
+    "42 964",
+    "91 513",
+    "405 network_bytes_sent",
+    "399 network_bytes_sent",
+    "399",
+    "42 405",
+    "513"
   ],
   "top_terms_favoring_ordinary": [
-    "28",
-    "duration_seconds 62",
-    "duration_seconds 28",
-    "62",
-    "408",
-    "408 network_bytes_sent",
-    "30 266",
-    "266 network_bytes_sent",
-    "266",
-    "38 408",
-    "523",
-    "946",
-    "946 network_bytes_sent",
-    "523 network_bytes_sent",
-    "29 523"
+    "duration_seconds 61",
+    "61",
+    "095",
+    "095 network_bytes_sent",
+    "111",
+    "111 network_bytes_sent",
+    "91 111",
+    "42 095",
+    "801 network_bytes_sent",
+    "40 135",
+    "135 network_bytes_sent",
+    "801",
+    "40 801",
+    "135",
+    "53 256"
   ]
 }

@@ -100,10 +100,35 @@ def normalize_text(text: str) -> str:
 # Episode discovery + loading
 # ---------------------------------------------------------------------------
 
-def load_episodes(raw_dir: Path) -> list[dict]:
+def parse_episode_id_ranges(spec: str) -> set[str] | None:
+    """Parse '060-090,100-130' (or single ids, e.g. '005,007') into the set
+    of zero-padded 3-digit episode_id strings it selects. Returns None for
+    a falsy spec, meaning "no filter, include every episode" -- callers
+    should treat None and "select everything" as the same case.
+    """
+    if not spec:
+        return None
+    ids: set[str] = set()
+    for part in spec.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "-" in part:
+            lo, hi = part.split("-")
+            ids.update(f"{n:03d}" for n in range(int(lo), int(hi) + 1))
+        else:
+            ids.add(f"{int(part):03d}")
+    return ids
+
+
+def load_episodes(raw_dir: Path, episode_id_filter: set[str] | None = None) -> list[dict]:
     episodes_root = raw_dir / "episodes"
     episodes = []
+    n_skipped_by_filter = 0
     for ep_dir in sorted(episodes_root.iterdir()):
+        if episode_id_filter is not None and ep_dir.name not in episode_id_filter:
+            n_skipped_by_filter += 1
+            continue
         meta_path = ep_dir / "metadata.json"
         if not meta_path.exists():
             print(f"[preprocess] WARNING: {ep_dir} has no metadata.json, skipping")
@@ -111,6 +136,8 @@ def load_episodes(raw_dir: Path) -> list[dict]:
         with open(meta_path) as f:
             metadata = json.load(f)
         episodes.append({"dir": ep_dir, "metadata": metadata})
+    if episode_id_filter is not None:
+        print(f"[preprocess] --episode-ids filter active: {n_skipped_by_filter} episode(s) on disk excluded")
     return episodes
 
 
@@ -262,13 +289,21 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--raw-dir", default=str(REPO_ROOT / "data" / "raw"))
     parser.add_argument("--processed-dir", default=str(REPO_ROOT / "data" / "processed"))
+    parser.add_argument(
+        "--episode-ids", default=None,
+        help="Only include these episode ids, e.g. '060-090,100-130'. Default: all episodes "
+             "on disk. Everything downstream (train_*.py, evaluate.py) reads only the CSVs "
+             "this script writes, so this is the one place to scope a training run to a "
+             "specific subset without touching data/raw/.",
+    )
     args = parser.parse_args()
 
     raw_dir = Path(args.raw_dir)
     processed_dir = Path(args.processed_dir)
     processed_dir.mkdir(parents=True, exist_ok=True)
 
-    episodes = load_episodes(raw_dir)
+    episode_id_filter = parse_episode_id_ranges(args.episode_ids)
+    episodes = load_episodes(raw_dir, episode_id_filter)
 
     index_rows, text_rows, nvml_rows = [], [], []
     n_success, n_failed = 0, 0

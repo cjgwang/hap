@@ -214,22 +214,38 @@ classifier can't just memorize one exact invocation. `ordinary_*` and
 point is that compute should look the same; only workflow/dataset metadata
 should differ.
 
-| Family | Model weights | Dataset | Objective | Steps | Batch size | LR |
+| Family | Model weights | Dataset | Objective | Max steps (cap) | Batch size | LR |
 |---|---|---|---|---|---|---|
 | `*_finetune` | pretrained (`Qwen/Qwen2.5-0.5B-Instruct` or `Qwen/Qwen2.5-1.5B-Instruct`) | PKU-SafeRLHF-QA (`is_safe`) | SFT, prompt-masked (`train_causal_lm_sft`) | 20-40 | 2-8 | 3e-5-1e-4 |
 | `*_inference` | pretrained, same pool | WildGuardMix (`prompt_harm_label`) | no training -- `model.generate()`, sampled (`do_sample=True, top_k=50`) | n/a | n/a | n/a |
 | `*_training` | **randomly initialized** (`AutoModelForCausalLM.from_config`, no pretrained weights) | PKU-SafeRLHF-QA (`is_safe`) | SFT, prompt-masked (`train_causal_lm_sft`) | 40-60 | 4-16 | 5e-4-2e-3 |
 
 `*_inference` samples 40-80 prompts, 1-3 passes, 16-24 new tokens per
-completion. `*_finetune` and `*_training` share the exact same SFT recipe
+completion, generated via the model's **chat template** (`role="user"`,
+`add_generation_prompt=True`) so instruction-tuned models are actually
+addressed as an assistant -- required for trained refusal behavior to
+reliably trigger at all, and for `*_inference` duration/telemetry to have
+any chance of reflecting it (`generate()` already stops early at EOS by
+default, so a short refusal vs. a long answer can show up in duration once
+the model is prompted correctly).
+
+`*_finetune` and `*_training` share the exact same SFT recipe
 (`workloads/common.py`'s `train_causal_lm_sft`): tokenize prompt and
 response separately, concatenate, and set the label to `-100` (PyTorch/HF's
 "ignore this position" value) at every prompt-token position, so gradients
-only come from predicting the response. The only mechanical difference
-between the two is pretrained vs. randomly-initialized weights (and the
-correspondingly higher step count / learning rate `*_training` needs to
-make progress from nothing) -- both otherwise run identical code over the
-identical dataset/filter their `ordinary`/`adversarial` counterpart uses.
+only come from predicting the response. **Training now stops on
+convergence** rather than running a fixed step count: it tracks the best
+loss seen and stops once `--patience` (default 5) consecutive steps fail
+to improve on it by at least `--min-delta` (default 0.01), after at least
+5 steps. `--max-steps` (the old `--steps`) is now a **safety cap**, not a
+target -- duration is genuinely data-dependent (harder-to-fit data takes
+more steps) rather than fixed in advance. `metrics.json` in each episode's
+`work/` dir records both `max_steps` and the actual `steps_taken`. The only
+mechanical difference between `*_finetune` and `*_training` is pretrained
+vs. randomly-initialized weights (and the correspondingly higher step-cap
+/ learning rate `*_training` needs to make progress from nothing) -- both
+otherwise run identical code over the identical dataset/filter their
+`ordinary`/`adversarial` counterpart uses.
 
 ## Running the experiment
 
@@ -325,7 +341,7 @@ stdout.log              # workload stdout/stderr, for debugging failures (not pa
   "seed": 0,
   "gpu_index": 0,
   "command": ["python", "workloads/ordinary_finetune.py", "..."],
-  "params": {"model": "Qwen/Qwen2.5-0.5B-Instruct", "batch_size": 4, "steps": 30},
+  "params": {"model": "Qwen/Qwen2.5-0.5B-Instruct", "batch_size": 4, "max_steps": 30},
   "nvml_sample_count": 161,
   "nvml_error_count": 0,
   "process_sample_count": 161,
